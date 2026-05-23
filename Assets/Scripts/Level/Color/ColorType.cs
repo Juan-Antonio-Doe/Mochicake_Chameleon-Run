@@ -1,0 +1,1 @@
+public enum ColorType { ColorA, ColorB }

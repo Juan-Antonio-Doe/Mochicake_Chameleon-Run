@@ -214,6 +214,7 @@ GameObject:
   m_Component:
   - component: {fileID: 121362442}
   - component: {fileID: 121362445}
+  - component: {fileID: 121362446}
   - component: {fileID: 121362444}
   - component: {fileID: 121362443}
   m_Layer: 8
@@ -306,6 +307,7 @@ MonoBehaviour:
   <revalidateProperties>k__BackingField: 0
   <capCol>k__BackingField: {fileID: 121362444}
   <rb>k__BackingField: {fileID: 121362443}
+  <pRenderer>k__BackingField: {fileID: 617174927}
   <groundCheck>k__BackingField: {fileID: 1791177217}
   <moveSpeed>k__BackingField: 8
   <jumpForce>k__BackingField: 10
@@ -313,7 +315,62 @@ MonoBehaviour:
   <groundMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 8
+  <currentColor>k__BackingField: 0
+  <colorALayer>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 64
+  <colorAMask>k__BackingField: 6
+  <colorBLayer>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 128
+  <colorBMask>k__BackingField: 7
   <isGrounded>k__BackingField: 0
+  <jumpBuffered>k__BackingField: 0
+  <colorSwitchBuffered>k__BackingField: 0
+--- !u!114 &121362446
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121362441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55cdc94954cd51e4c8d36945e724ef33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <settings>k__BackingField: {fileID: 11400000, guid: 2303e68c54e04594bbecb691d719c70e,
+    type: 2}
+  onJumpRequested:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 121362445}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: Jump
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onColorSwitchRequested:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 121362445}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: SwitchColor
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &155106751
 GameObject:
   m_ObjectHideFlags: 0
@@ -905,7 +962,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 448
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 50239
@@ -928,18 +985,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9ff710659896cd43b59af8d826b64a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <usingTag>k__BackingField: 0
+  <usingTag>k__BackingField: 1
   <tagToCompare>k__BackingField: Player
   <onTriggerEnter>k__BackingField:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 121362441}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 0
+      - m_Target: {fileID: 121362445}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: resetPos
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
