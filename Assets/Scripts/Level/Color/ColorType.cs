@@ -1,1 +1,1 @@
-public enum ColorType { ColorA, ColorB }
+public enum ColorType { ColorA, ColorB, None }

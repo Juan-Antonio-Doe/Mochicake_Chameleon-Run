@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour {
 
     [field: Header("Auto-Assigned Settings")]
     [field: SerializeField] private bool revalidateProperties { get; set; } = false;
+    [field: SerializeField, ReadOnlyField] private LevelManager levelManager { get; set; }
 
     [field: Header("Components")]
     [field: SerializeField, ReadOnlyField] private CapsuleCollider capCol { get; set; }
@@ -35,7 +36,6 @@ public class PlayerController : MonoBehaviour {
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpBuffered { get; set; }
-    [field: SerializeField, ReadOnlyField] private bool colorSwitchBuffered { get; set; }
 
 #if UNITY_EDITOR
     /*
@@ -62,6 +62,9 @@ public class PlayerController : MonoBehaviour {
     void AssingOnValidate() {
         // Code to execute when revalidating properties
 
+        if (levelManager == null)
+            levelManager = FindObjectOfType<LevelManager>();
+
         if (capCol == null)
             capCol = GetComponentInChildren<CapsuleCollider>();
 
@@ -71,20 +74,21 @@ public class PlayerController : MonoBehaviour {
         if (pRenderer == null)
             pRenderer = transform.GetChild(0).GetChild(0).GetComponent<Renderer>();
 
-        if (colorAMask != ToLayerIndex(colorALayer))
-            colorAMask = ToLayerIndex(colorALayer);
-
-        if (colorBMask != ToLayerIndex(colorBLayer))
-            colorBMask = ToLayerIndex(colorBLayer);
+        colorAMask = GeneralUtilities.ToLayerIndex(colorALayer);
+        colorBMask = GeneralUtilities.ToLayerIndex(colorBLayer);
 
         revalidateProperties = false;
     }
 #endif
 
-    /*void OnEnable() {
-        playerInput.onJumpRequested += () => jumpBuffered = true;
-        playerInput.onColorSwitchRequested += () => colorSwitchBuffered = true;
-    }*/
+    void Awake() {
+        propBlock = new MaterialPropertyBlock();
+        pRenderer.GetPropertyBlock(propBlock);
+    }
+
+    void Start() {
+        UpdateVisuals();
+    }
 
     /*void Update() {
         HandleInput();
@@ -95,11 +99,6 @@ public class PlayerController : MonoBehaviour {
         AutoMove();
         HandleJump();
     }
-
-    /*void OnDisable() {
-        playerInput.onJumpRequested -= () => jumpBuffered = true;
-        playerInput.onColorSwitchRequested -= () => colorSwitchBuffered = true;
-    }*/
 
     // ── Movement ──────────────────────────────────────────────
 
@@ -124,13 +123,11 @@ public class PlayerController : MonoBehaviour {
 
         gameObject.layer = currentColor == ColorType.ColorA ? colorAMask : colorBMask;
 
-        UpdateVisuals(currentColor == ColorType.ColorA ? Color.red : Color.blue);
+        UpdateVisuals(/*currentColor == ColorType.ColorA ? Color.red : Color.blue*/);       
     }
 
-    void UpdateVisuals(Color color) {
-        propBlock ??= new MaterialPropertyBlock();
-        pRenderer.GetPropertyBlock(propBlock);
-        propBlock.SetColor(colorProp, color);
+    void UpdateVisuals() {
+        propBlock.SetColor(colorProp, levelManager.colorManager.colorSettings.GetColor(currentColor));
         pRenderer.SetPropertyBlock(propBlock);
     }
 
@@ -160,7 +157,4 @@ public class PlayerController : MonoBehaviour {
     bool CheckGround() {
         return isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
     }
-
-    // ── Utilities ──────────────────────────────────────────
-    private int ToLayerIndex(LayerMask mask) => Mathf.RoundToInt(Mathf.Log(mask.value, 2));
 }

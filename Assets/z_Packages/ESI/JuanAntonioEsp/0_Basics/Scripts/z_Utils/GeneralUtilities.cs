@@ -58,4 +58,14 @@ public static class GeneralUtilities {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !locked;
     }
+
+    /// <summary>
+    /// Converts a LayerMask to its corresponding layer index. 
+    /// Note that this method assumes the LayerMask contains only one layer.
+    /// </summary>
+    /// <param name="mask"></param>
+    /// <returns></returns>
+    public static int ToLayerIndex(LayerMask mask) {
+        return Mathf.RoundToInt(Mathf.Log(mask.value, 2));
+    }
 }

@@ -9,8 +9,6 @@ public class PlayerInput : MonoBehaviour {
     [field: SerializeField] private InputSettings settings { get; set; }
 
     [field: Header("Events")]
-    /*public event Action OnJumpRequested;
-    public event Action OnColorSwitchRequested;*/
     [field: SerializeField] public UnityEvent onJumpRequested;
     [field: SerializeField] public UnityEvent onColorSwitchRequested;
 
@@ -39,8 +37,4 @@ public class PlayerInput : MonoBehaviour {
             _ => false
         };
     }
-
-    // Llamados por los botones UI desde el Inspector
-    //public void OnJumpButtonPressed() => onJumpRequested?.Invoke();
-    //public void OnColorSwitchButtonPressed() => onColorSwitchRequested?.Invoke();
 }
