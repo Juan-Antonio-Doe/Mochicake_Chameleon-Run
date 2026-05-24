@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour {
 
@@ -17,9 +18,14 @@ public class LevelManager : MonoBehaviour {
     //[field: SerializeField, ReadOnlyField] public ObjectPool objectPool { get; private set; }
     //[field: SerializeField, ReadOnlyField] public PauseManager pauseManager { get; private set; }
 
+    [field: Header("Level Properties")]
+    [field: SerializeField] private Timer levelTimer { get; set; } = new Timer();
+
+
     [field: Header("Level UI Properties")]
     [field: SerializeField] private float backToMainMenuTime { get; set; } = 15f;
     [field: SerializeField] public GameObject hud { get; set; }
+    [field: SerializeField] private Text timerText { get; set; }
 
     [field: Header("End Level")]
     [field: SerializeField] private UnityEvent onLevelEnd { get; set; }
@@ -70,6 +76,26 @@ public class LevelManager : MonoBehaviour {
         isLevelOnGoingDebug = false;
     }
 
-    void OnEnable() => GameEvents.OnPlayerFailed += playerController.resetPlayer;
-    void OnDisable() => GameEvents.OnPlayerFailed -= playerController.resetPlayer;
+    void OnEnable() => GameEvents.OnPlayerFailed += ResetLevel;
+    void OnDisable() => GameEvents.OnPlayerFailed -= ResetLevel;
+
+    void Start() {
+        levelTimer.Start();
+    }
+
+    void Update() {
+        levelTimer.Tick();
+        timerText.text = GeneralUtilities.FormatTime(levelTimer.CurrentTime, TimeFormat.SecondsCentiseconds);
+    }
+
+    public void OnTimerComplete() {
+        Debug.Log("Time is up!");
+    }
+
+    void ResetLevel() {
+        levelTimer.Reset();
+        playerController.resetPlayer();
+        //IsLevelOnGoing = false;
+        //isLevelOnGoingDebug = false;
+    }
 }

@@ -63,9 +63,49 @@ public static class GeneralUtilities {
     /// Converts a LayerMask to its corresponding layer index. 
     /// Note that this method assumes the LayerMask contains only one layer.
     /// </summary>
-    /// <param name="mask"></param>
-    /// <returns></returns>
     public static int ToLayerIndex(LayerMask mask) {
         return Mathf.RoundToInt(Mathf.Log(mask.value, 2));
     }
+
+    /// <summary>
+    /// Formats a time value in seconds to a string based on the specified format.
+    /// </summary>
+    /// <param name="time">Time in seconds.</param>
+    /// <param name="format">The desired display format.</param>
+    public static string FormatTime(float time, TimeFormat format = TimeFormat.MinutesSeconds) {
+        return format switch {
+            TimeFormat.SecondsOnly =>
+                $"{(int)time:00}",
+
+            TimeFormat.SecondsMilliseconds =>
+                $"{(int)time:00}.{(int)(time * 1000f) % 1000:000}",
+
+            TimeFormat.SecondsCentiseconds =>
+                $"{(int)time:00}.{(int)(time * 100f) % 100:00}",
+
+            TimeFormat.MinutesSeconds =>
+                $"{(int)(time / 60f):00}:{(int)time % 60:00}",
+
+            TimeFormat.MinutesSecondsMilliseconds =>
+                $"{(int)(time / 60f):00}:{(int)time % 60:00}.{(int)(time * 1000f) % 1000:000}",
+
+            TimeFormat.MinutesSecondsCentiseconds =>
+                $"{(int)(time / 60f):00}:{(int)time % 60:00}.{(int)(time * 100f) % 100:00}",
+
+            TimeFormat.HoursMinutesSeconds =>
+                $"{(int)(time / 3600f):00}:{(int)(time % 3600f / 60f):00}:{(int)time % 60:00}",
+
+            _ => $"{(int)(time / 60f):00}:{(int)time % 60:00}"
+        };
+    }
+}
+
+public enum TimeFormat {
+    SecondsOnly,
+    SecondsMilliseconds,
+    SecondsCentiseconds,
+    MinutesSeconds,
+    MinutesSecondsMilliseconds,
+    MinutesSecondsCentiseconds,
+    HoursMinutesSeconds
 }
