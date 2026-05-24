@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private CapsuleCollider capCol { get; set; }
     [field: SerializeField, ReadOnlyField] private Rigidbody rb { get; set; }
     [field: SerializeField, ReadOnlyField] private Renderer pRenderer { get; set; }
-    //[field: SerializeField, ReadOnlyField] private PlayerInput playerInput { get; set; }
     [field: SerializeField] private Transform groundCheck { get; set; }
 
     [field: Header("Movement")]
@@ -34,11 +33,11 @@ public class PlayerController : MonoBehaviour {
     private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
 
     [field: Header("Debug")]
+    [field: SerializeField, ReadOnlyField] private ColorType startingColor { get; set; }
     [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpBuffered { get; set; }
     [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
-    //[field: SerializeField, ReadOnlyField] private ObjectColor currentPlatform { get; set; }
     [field: SerializeField, ReadOnlyField] private Collider[] overlapBuffer { get; set; } = new Collider[4];
 
 #if UNITY_EDITOR
@@ -88,6 +87,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Start() {
+        startingColor = currentColor;
         jumpsRemaining = maxJumps;
         UpdateVisuals();
     }
@@ -113,11 +113,6 @@ public class PlayerController : MonoBehaviour {
     void OnCollisionEnter(Collision collision) {
         if (!collision.gameObject.CompareTag("Platform")) return;
 
-        /*if (!collision.gameObject.TryGetComponent<ObjectColor>(out var platform)) return;   // There are too many platforms, so this GetComponent cannot be cached efficiently.
-
-        if (platform.ColorType == ColorType.None || platform.ColorType != currentColor)
-            GameEvents.TriggerPlayerFailed();*/
-
         float normalY = collision.GetContact(0).normal.y;
 
         // Side/frontal -> always fail
@@ -133,17 +128,7 @@ public class PlayerController : MonoBehaviour {
             GameEvents.TriggerPlayerFailed();
             return;
         }
-
-        /*if (normalY > 0.5f)
-            currentPlatform = platform;*/
     }
-
-    /*void OnCollisionExit(Collision collision) {
-        if (!collision.gameObject.CompareTag("Platform")) return;
-
-        if (currentPlatform != null && collision.gameObject == currentPlatform.gameObject)
-            currentPlatform = null;
-    }*/
 
     // ── Movement ──────────────────────────────────────────────
 
@@ -180,9 +165,6 @@ public class PlayerController : MonoBehaviour {
         currentColor = currentColor == ColorType.ColorA ? ColorType.ColorB : ColorType.ColorA;
         UpdateVisuals();
 
-        /*if (currentPlatform != null &&
-        (currentPlatform.ColorType == ColorType.None || currentPlatform.ColorType != currentColor))
-            GameEvents.TriggerPlayerFailed();*/
         CheckPlatformColorMismatch();
     }
 
@@ -208,7 +190,8 @@ public class PlayerController : MonoBehaviour {
         rb.position = Vector3.zero;
 
         // Reset player state
-        //currentPlatform = null;
+        currentColor = startingColor;
+        UpdateVisuals();
         jumpBuffered = false;
         jumpHeld = false;
         jumpsRemaining = maxJumps;

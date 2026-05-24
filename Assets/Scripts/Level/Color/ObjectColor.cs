@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class ObjectColor : MonoBehaviour {
@@ -26,9 +27,9 @@ public class ObjectColor : MonoBehaviour {
             // Código que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
-            //bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
+            bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
-            if (!isValidPrefabStage /*&& prefabConnected*/) {
+            if (!isValidPrefabStage && prefabConnected) {
                 if (revalidateProperties)
                     AssingOnValidate();
             }
@@ -47,6 +48,11 @@ public class ObjectColor : MonoBehaviour {
         colorAMask = GeneralUtilities.ToLayerIndex(colorALayer);
         colorBMask = GeneralUtilities.ToLayerIndex(colorBLayer);
 
+        if (colorType != ColorType.None)
+            gameObject.layer = colorType == ColorType.ColorA ? colorAMask : colorBMask;
+        else
+            gameObject.layer = 3; // Ground layer
+
         revalidateProperties = false;
     }
 #endif
@@ -54,7 +60,6 @@ public class ObjectColor : MonoBehaviour {
     void Start() {
         if (colorType != ColorType.None) {
             cubeRenderer.sharedMaterial = LevelManager.Instance.colorManager.GetMaterial(colorType);
-            gameObject.layer = colorType == ColorType.ColorA ? colorAMask : colorBMask;
         }
     }
 }
