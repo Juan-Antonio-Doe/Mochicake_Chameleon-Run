@@ -316,7 +316,7 @@ GameObject:
   - component: {fileID: 121362446}
   - component: {fileID: 121362444}
   - component: {fileID: 121362443}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: '[Player]'
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -375,7 +375,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 121362441}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 749e9052780b2854e8f907bd44f6521f, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -409,23 +409,21 @@ MonoBehaviour:
   <rb>k__BackingField: {fileID: 121362443}
   <pRenderer>k__BackingField: {fileID: 617174927}
   <groundCheck>k__BackingField: {fileID: 1791177217}
-  <moveSpeed>k__BackingField: 8
+  <moveSpeed>k__BackingField: 12
   <jumpForce>k__BackingField: 10
+  <maxJumps>k__BackingField: 2
+  <fallMultiplier>k__BackingField: 2.5
+  <lowJumpMultiplier>k__BackingField: 2
   <groundCheckRadius>k__BackingField: 0.1
   <groundMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 200
   <currentColor>k__BackingField: 0
-  <colorALayer>k__BackingField:
-    serializedVersion: 2
-    m_Bits: 64
-  <colorAMask>k__BackingField: 6
-  <colorBLayer>k__BackingField:
-    serializedVersion: 2
-    m_Bits: 128
-  <colorBMask>k__BackingField: 7
   <isGrounded>k__BackingField: 0
   <jumpBuffered>k__BackingField: 0
+  <jumpsRemaining>k__BackingField: 0
+  <jumpHeld>k__BackingField: 0
+  <currentPlatform>k__BackingField: {fileID: 0}
 --- !u!114 &121362446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,38 +436,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55cdc94954cd51e4c8d36945e724ef33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <revalidateProperties>k__BackingField: 0
+  <playerController>k__BackingField: {fileID: 121362445}
   <settings>k__BackingField: {fileID: 11400000, guid: 2303e68c54e04594bbecb691d719c70e,
     type: 2}
-  onJumpRequested:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 121362445}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: Jump
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onColorSwitchRequested:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 121362445}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: SwitchColor
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1 &155106751
 GameObject:
   m_ObjectHideFlags: 0
@@ -662,13 +632,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 235499204}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 8.75, y: 1.75, z: 0}
+  m_LocalRotation: {x: 0.030843586, y: -0.4995243, z: 0.030843563, w: 0.865201}
+  m_LocalPosition: {x: 8.75, y: 2.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1962625422}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 4.829, y: -59.945, z: 1.297}
 --- !u!114 &235499208
 MonoBehaviour:
   m_ObjectHideFlags: 0

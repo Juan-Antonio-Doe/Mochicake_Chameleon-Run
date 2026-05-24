@@ -11,6 +11,7 @@ public class ObjectColor : MonoBehaviour {
 
     [field: Header("Color settings")]
 	[field: SerializeField] private ColorType colorType { get; set; } = ColorType.ColorA;
+    public ColorType ColorType => colorType;
     [field: SerializeField, ReadOnlyField] private CustomColorSetting colorSettings { get; set; }
     [field: SerializeField] private LayerMask colorALayer { get; set; } = 1 << 6;
     [field: SerializeField, ReadOnlyField] private int colorAMask { get; set; }

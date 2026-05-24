@@ -19,6 +19,10 @@ public class PlayerController : MonoBehaviour {
     [field: Header("Movement")]
     [field: SerializeField] private float moveSpeed { get; set; } = 8f;
     [field: SerializeField] private float jumpForce { get; set; } = 10f;
+    [field: Header("Jump")]
+    [field: SerializeField] private int maxJumps { get; set; } = 2;
+    [field: SerializeField] private float fallMultiplier { get; set; } = 2.5f;
+    [field: SerializeField] private float lowJumpMultiplier { get; set; } = 2f;
 
     [field: Header("Ground Check")]
     [field: SerializeField] private float groundCheckRadius { get; set; } = 0.1f;
@@ -26,16 +30,16 @@ public class PlayerController : MonoBehaviour {
 
     [field: Header("Color settings")]
     [field: SerializeField] private ColorType currentColor { get; set; } = ColorType.ColorA;
-    [field: SerializeField] private LayerMask colorALayer { get; set; } = 1 << 6;
-    [field: SerializeField, ReadOnlyField] private int colorAMask { get; set; }
-    [field: SerializeField] private LayerMask colorBLayer { get; set; } = 1 << 7;
-    [field: SerializeField, ReadOnlyField] private int colorBMask { get; set; }
     [field: SerializeField] private MaterialPropertyBlock propBlock { get; set; }
     private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpBuffered { get; set; }
+    [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
+    [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
+    //[field: SerializeField, ReadOnlyField] private ObjectColor currentPlatform { get; set; }
+    [field: SerializeField, ReadOnlyField] private Collider[] overlapBuffer { get; set; } = new Collider[4];
 
 #if UNITY_EDITOR
     /*
@@ -74,9 +78,6 @@ public class PlayerController : MonoBehaviour {
         if (pRenderer == null)
             pRenderer = transform.GetChild(0).GetChild(0).GetComponent<Renderer>();
 
-        colorAMask = GeneralUtilities.ToLayerIndex(colorALayer);
-        colorBMask = GeneralUtilities.ToLayerIndex(colorBLayer);
-
         revalidateProperties = false;
     }
 #endif
@@ -87,18 +88,62 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Start() {
+        jumpsRemaining = maxJumps;
         UpdateVisuals();
     }
 
-    /*void Update() {
-        HandleInput();
-    }*/
-
     void FixedUpdate() {
+        bool wasGrounded = isGrounded;
         CheckGround();
+
+        if (!wasGrounded && isGrounded) {
+            jumpsRemaining = maxJumps;
+        }
+        // [Removed] This isn't present in the android game.
+        /*else if (wasGrounded && !isGrounded && jumpsRemaining == maxJumps) {
+            // Walked off edge without jumping — consume one jump
+            jumpsRemaining = maxJumps - 1;
+        }*/
+
         AutoMove();
         HandleJump();
+        ApplyGravity();
     }
+
+    void OnCollisionEnter(Collision collision) {
+        if (!collision.gameObject.CompareTag("Platform")) return;
+
+        /*if (!collision.gameObject.TryGetComponent<ObjectColor>(out var platform)) return;   // There are too many platforms, so this GetComponent cannot be cached efficiently.
+
+        if (platform.ColorType == ColorType.None || platform.ColorType != currentColor)
+            GameEvents.TriggerPlayerFailed();*/
+
+        float normalY = collision.GetContact(0).normal.y;
+
+        // Side/frontal -> always fail
+        if (Mathf.Abs(normalY) < 0.5f) {
+            GameEvents.TriggerPlayerFailed();
+            return;
+        }
+
+        // Top or bottom surface -> check color
+        if (!collision.gameObject.TryGetComponent<ObjectColor>(out var platform)) return;
+
+        if (platform.ColorType == ColorType.None || platform.ColorType != currentColor) {
+            GameEvents.TriggerPlayerFailed();
+            return;
+        }
+
+        /*if (normalY > 0.5f)
+            currentPlatform = platform;*/
+    }
+
+    /*void OnCollisionExit(Collision collision) {
+        if (!collision.gameObject.CompareTag("Platform")) return;
+
+        if (currentPlatform != null && collision.gameObject == currentPlatform.gameObject)
+            currentPlatform = null;
+    }*/
 
     // ── Movement ──────────────────────────────────────────────
 
@@ -109,21 +154,36 @@ public class PlayerController : MonoBehaviour {
     }
 
     void HandleJump() {
-        if (jumpBuffered && isGrounded) {
+        if (jumpBuffered && jumpsRemaining > 0) {
             Vector3 vel = rb.velocity;
             vel.y = jumpForce;
             rb.velocity = vel;
+            jumpsRemaining--;
         }
+
         jumpBuffered = false;
     }
 
-    // Called by PlayerInput through UnityEvent in the Inspector
+    void ApplyGravity() {
+        float extraGravity = rb.velocity.y < 0
+            ? fallMultiplier - 1          // Falling: heavier
+            : !jumpHeld ? lowJumpMultiplier - 1  // Rising but button released: cut jump short
+            : 0f;                         // Rising and button held: full jump
+
+        if (extraGravity > 0f)
+            rb.AddForce(Vector3.down * Physics.gravity.magnitude * extraGravity, ForceMode.Acceleration);
+    }
+
+    // ── Input ──────────────────────────────────────────
+
     public void SwitchColor() {
         currentColor = currentColor == ColorType.ColorA ? ColorType.ColorB : ColorType.ColorA;
+        UpdateVisuals();
 
-        gameObject.layer = currentColor == ColorType.ColorA ? colorAMask : colorBMask;
-
-        UpdateVisuals(/*currentColor == ColorType.ColorA ? Color.red : Color.blue*/);       
+        /*if (currentPlatform != null &&
+        (currentPlatform.ColorType == ColorType.None || currentPlatform.ColorType != currentColor))
+            GameEvents.TriggerPlayerFailed();*/
+        CheckPlatformColorMismatch();
     }
 
     void UpdateVisuals() {
@@ -131,30 +191,47 @@ public class PlayerController : MonoBehaviour {
         pRenderer.SetPropertyBlock(propBlock);
     }
 
-    // Called by PlayerInput through UnityEvent in the Inspector
     public void Jump() {
         jumpBuffered = true;
+        jumpHeld = true;
+    }
+
+    public void JumpReleased() {
+        jumpHeld = false;
     }
 
     // [Test] Called by Trigger Zone when reach the end of the test level.
-    public void resetPos () {
-        transform.position = new Vector3(0, transform.position.y, 0);
+    public void resetPlayer () {
+        // Reset physics state
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.position = Vector3.zero;
+
+        // Reset player state
+        //currentPlatform = null;
+        jumpBuffered = false;
+        jumpHeld = false;
+        jumpsRemaining = maxJumps;
     }
 
-    // ── Input ─────────────────────────────────────────────────
-
-    /*void HandleInput() {
-        if (!Input.GetMouseButtonDown(0)) return;
-
-        if (Input.mousePosition.x < Screen.width * 0.5f)
-            jumpBuffered = true;
-        else
-            SwitchColor();
-    }*/
-
-    // ── Ground Check ──────────────────────────────────────────
+    // ── Checkers ──────────────────────────────────────────
 
     bool CheckGround() {
         return isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
     }
+    void CheckPlatformColorMismatch() {
+        if (!isGrounded) return;
+
+        int count = Physics.OverlapSphereNonAlloc(groundCheck.position, groundCheckRadius, overlapBuffer, groundMask);
+
+        for (int i = 0; i < count; i++) {
+            if (!overlapBuffer[i].TryGetComponent<ObjectColor>(out var platform)) continue;
+
+            if (platform.ColorType == ColorType.None || platform.ColorType != currentColor) {
+                GameEvents.TriggerPlayerFailed();
+                return;
+            }
+        }
+    }
+
 }

@@ -70,4 +70,6 @@ public class LevelManager : MonoBehaviour {
         isLevelOnGoingDebug = false;
     }
 
+    void OnEnable() => GameEvents.OnPlayerFailed += playerController.resetPlayer;
+    void OnDisable() => GameEvents.OnPlayerFailed -= playerController.resetPlayer;
 }
