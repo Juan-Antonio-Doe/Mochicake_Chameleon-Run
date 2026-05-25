@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public class PlayerInput : MonoBehaviour {
 
@@ -11,6 +12,9 @@ public class PlayerInput : MonoBehaviour {
 
     [field: Header("Components")]
     [field: SerializeField] private InputSettings settings { get; set; }
+
+    [field: Header("Debug")]
+    [field: SerializeField, ReadOnlyField] private bool pressStartedOnUI { get; set; }
 
 #if UNITY_EDITOR
     /*
@@ -49,6 +53,69 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private void HandleScreenInput() {
+#if UNITY_EDITOR || UNITY_STANDALONE
+        HandleMouseInput();
+#elif UNITY_ANDROID
+    HandleTouchInput();
+#endif
+    }
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+    private void HandleMouseInput() {
+        bool mouseDown = Input.GetMouseButtonDown(0);
+        bool mouseUp = Input.GetMouseButtonUp(0);
+
+        if (mouseDown)
+            pressStartedOnUI = EventSystem.current.IsPointerOverGameObject();
+
+        if (pressStartedOnUI) return; // Block ALL input if press started on UI
+
+        if (mouseUp)
+            playerController.JumpReleased();
+
+        if (!mouseDown) return;
+
+        bool isLeftHalf = Input.mousePosition.x < Screen.width * 0.5f;
+
+        if (MatchesMode(settings.JumpMode, isLeftHalf))
+            playerController.Jump();
+
+        if (MatchesMode(settings.ColorSwitchMode, isLeftHalf))
+            playerController.SwitchColor();
+    }
+#endif
+
+#if UNITY_ANDROID
+private void HandleTouchInput() {
+    if (Input.touchCount == 0) return;
+
+    Touch touch = Input.GetTouch(0);
+
+    if (touch.phase == TouchPhase.Began)
+        pressStartedOnUI = EventSystem.current.IsPointerOverGameObject(touch.fingerId);
+
+    //Debug.Log($"Touch phase: {touch.phase}, Position: {touch.position}, PressStartedOnUI: {pressStartedOnUI}, FingerId: {touch.fingerId");
+
+    if (pressStartedOnUI) return;
+
+    bool isLeftHalf = touch.position.x < Screen.width * 0.5f;
+
+    switch (touch.phase) {
+        case TouchPhase.Began:
+            if (MatchesMode(settings.JumpMode, isLeftHalf))
+                playerController.Jump();
+            if (MatchesMode(settings.ColorSwitchMode, isLeftHalf))
+                playerController.SwitchColor();
+            break;
+        case TouchPhase.Ended:
+        case TouchPhase.Canceled:
+            playerController.JumpReleased();
+            break;
+    }
+}
+#endif
+
+    /*private void HandleScreenInput() {
         if (Input.GetMouseButtonUp(0))
             playerController.JumpReleased();
 
@@ -61,7 +128,7 @@ public class PlayerInput : MonoBehaviour {
 
         if (MatchesMode(settings.ColorSwitchMode, isLeftHalf))
             playerController.SwitchColor();
-    }
+    }*/
 
     private bool MatchesMode(InputMode mode, bool isLeftHalf) {
         return mode switch {
