@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public static class GeneralUtilities {
@@ -60,6 +61,119 @@ public static class GeneralUtilities {
     }
 
     /// <summary>
+    /// Returns the current state of the cursor. True for locked, false for unlocked.
+    /// </summary>
+    /// <returns></returns>
+    public static bool CursorState() {
+        return Cursor.lockState == CursorLockMode.Locked;
+    }
+
+    /// <summary> 
+    /// Generate UniqueID using ClassType and Vector3.
+    /// Set directly the uniqueID property of the class passed as out parameter.
+    /// </summary>
+    public static void GenerateUniqueID<T>(T typeObject, Transform transform, out string uniqueID) {
+        //return $"{typeObject.GetType()}_{position.x}_{position.y}_{position.z}_{System.Guid.NewGuid()}";
+        Vector3 position = transform.position;
+        Quaternion rotation = transform.rotation;
+        string gameObjectName = transform.gameObject.name;
+
+        uniqueID = $"[{typeObject.GetType()}]_[{gameObjectName}]_{position.x}_{position.y}_{position.z}_{rotation.x}_{rotation.y}_{rotation.z}_{rotation.w}";
+    }
+
+    /// <summary>
+    /// Completely stops a ParticleSystem clearing all particles.
+    /// </summary>
+    public static void CompletelyStopParticleSystem(ParticleSystem system, bool childrens = true) {
+        system.Stop(childrens, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    /// <summary>
+    /// Enable or disable a list of GameObjects.
+    /// </summary>
+    public static void EnableDisableObjects(bool enabled, List<GameObject> objectsToDisable, MonoBehaviour coroutineExecuter = null) {
+        if (coroutineExecuter == null) {
+            foreach (GameObject obj in objectsToDisable) {
+                obj?.SetActive(enabled);
+            }
+        }
+        else {
+            coroutineExecuter.StartCoroutine(EnableDisableObjectsCo(enabled, objectsToDisable));
+        }
+    }
+
+    /// <summary>
+    /// Enable or disable a list of GameObjects. Ignore the objects in the list of objects to ignore.
+    /// </summary>
+    public static void EnableDisableObjects(bool enabled, List<GameObject> objectsToDisable, List<GameObject> objectsToIgnore, MonoBehaviour coroutineExecuter = null) {
+        if (coroutineExecuter == null) {
+            foreach (GameObject obj in objectsToDisable) {
+                if (!objectsToIgnore.Contains(obj))
+                    obj?.SetActive(enabled);
+            }
+        }
+        else {
+            coroutineExecuter.StartCoroutine(EnableDisableObjectsCo(enabled, objectsToDisable, objectsToIgnore));
+        }
+    }
+
+    static IEnumerator EnableDisableObjectsCo(bool enabled, List<GameObject> objectsToDisable, List<GameObject> objectsToIgnore = null) {
+        foreach (GameObject obj in objectsToDisable) {
+            if (objectsToIgnore is null || !objectsToIgnore.Contains(obj))
+                obj?.SetActive(enabled);
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// Reset a list of Animators to their default state.
+    /// </summary>
+    public static void ResetAnimators(List<Animator> animators, MonoBehaviour coroutineExecuter = null) {
+        if (coroutineExecuter == null) {
+            foreach (Animator anim in animators) {
+                if (anim is not null)
+                    if (anim.gameObject.activeInHierarchy)
+                        anim?.Update(0);
+                anim?.Rebind();
+            }
+        }
+        else {
+            coroutineExecuter.StartCoroutine(ResetAnimatorsCo(animators));
+        }
+    }
+
+    /// <summary>
+    /// Reset a list of Animators to their default state. Ignore the animators in the list of animators to ignore.
+    /// </summary>
+    public static void ResetAnimators(List<Animator> animators, List<Animator> animatorsToIgnore, MonoBehaviour coroutineExecuter = null) {
+        if (coroutineExecuter == null) {
+            foreach (Animator anim in animators) {
+                if (!animatorsToIgnore.Contains(anim)) {
+                    if (anim is not null)
+                        if (anim.gameObject.activeInHierarchy)
+                            anim?.Update(0);
+                    anim?.Rebind();
+                }
+            }
+        }
+        else {
+            coroutineExecuter.StartCoroutine(ResetAnimatorsCo(animators, animatorsToIgnore));
+        }
+    }
+
+    static IEnumerator ResetAnimatorsCo(List<Animator> animators, List<Animator> animatorsToIgnore = null) {
+        foreach (Animator anim in animators) {
+            if (animatorsToIgnore is null || !animatorsToIgnore.Contains(anim)) {
+                if (anim is not null)
+                    if (anim.gameObject.activeInHierarchy)
+                        anim?.Update(0);
+                anim?.Rebind();
+            }
+            yield return null;
+        }
+    }
+
+    /// <summary>
     /// Converts a LayerMask to its corresponding layer index. 
     /// Note that this method assumes the LayerMask contains only one layer.
     /// </summary>
@@ -98,6 +212,16 @@ public static class GeneralUtilities {
             _ => $"{(int)(time / 60f):00}:{(int)time % 60:00}"
         };
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// Delete PlayerPrefs.
+    /// </summary>
+    [MenuItem("Tools/PlayerPrefs/Delete PlayerPrefs")]
+    public static void DeletePlayerPrefs() {
+        PlayerPrefs.DeleteAll();
+    }
+#endif
 }
 
 public enum TimeFormat {

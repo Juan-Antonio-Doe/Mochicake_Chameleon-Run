@@ -86,10 +86,18 @@ public class PlayerController : MonoBehaviour {
         pRenderer.GetPropertyBlock(propBlock);
     }
 
+    void OnEnable() {
+        levelManager.colorManager.OnColorsApplied += UpdateVisuals;
+    }
+
+    void OnDisable() {
+        levelManager.colorManager.OnColorsApplied -= UpdateVisuals;
+    }
+
     void Start() {
         startingColor = currentColor;
         jumpsRemaining = maxJumps;
-        UpdateVisuals();
+        //UpdateVisuals();
     }
 
     void FixedUpdate() {

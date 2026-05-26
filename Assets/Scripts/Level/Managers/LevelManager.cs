@@ -8,7 +8,7 @@ public class LevelManager : MonoBehaviour {
 
     // Static Properties
     public static LevelManager Instance { get; private set; }
-    public static bool IsLevelOnGoing { get; private set; }
+    //public static bool IsLevelOnGoing { get; private set; }
 
 
     [field: Header("Autoattach On Editor Properties")]
@@ -23,15 +23,14 @@ public class LevelManager : MonoBehaviour {
 
 
     [field: Header("Level UI Properties")]
-    [field: SerializeField] private float backToMainMenuTime { get; set; } = 15f;
     [field: SerializeField] public GameObject hud { get; set; }
     [field: SerializeField] private Text timerText { get; set; }
 
-    [field: Header("End Level")]
+    /*[field: Header("End Level")]
     [field: SerializeField] private UnityEvent onLevelEnd { get; set; }
 
     [field: Header("Debug")]
-    [field: SerializeField, ReadOnlyField] private bool isLevelOnGoingDebug { get; set; }
+    [field: SerializeField, ReadOnlyField] private bool isLevelOnGoingDebug { get; set; }*/
 
 #if UNITY_EDITOR
     /*
@@ -71,9 +70,6 @@ public class LevelManager : MonoBehaviour {
     void Awake() {
         if (!Instance)
             Instance = this;
-
-        IsLevelOnGoing = false;
-        isLevelOnGoingDebug = false;
     }
 
     void OnEnable() => GameEvents.OnPlayerFailed += ResetLevel;
@@ -95,7 +91,5 @@ public class LevelManager : MonoBehaviour {
     void ResetLevel() {
         levelTimer.Reset();
         playerController.resetPlayer();
-        //IsLevelOnGoing = false;
-        //isLevelOnGoingDebug = false;
     }
 }

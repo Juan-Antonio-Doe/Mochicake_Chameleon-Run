@@ -4,8 +4,8 @@ using UnityEngine;
 [Serializable]
 public class CustomColorSetting {
 
-    [field: SerializeField] private Color colorA { get; set; } = new Color(1f, 0.5f, 0f); // Orange
-    [field: SerializeField] private Color colorB { get; set; } = new Color(0.5f, 0f, 1f); // Purple
+    [field: SerializeField] private Color colorA { get; set; } = new Color(1f, 0.87f, 0f); // Yellow
+    [field: SerializeField] private Color colorB { get; set; } = new Color(1f, 0.35f, 0f); // Orange
 
     public Color ColorA => colorA;
     public Color ColorB => colorB;

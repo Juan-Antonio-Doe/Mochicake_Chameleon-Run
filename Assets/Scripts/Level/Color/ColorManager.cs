@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class ColorManager : MonoBehaviour {
     private Material matB { get; set; }
 
     private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
+
+    public event Action OnColorsApplied;
 
     void Awake() {
         matA = new Material(baseMaterial);
@@ -31,5 +34,6 @@ public class ColorManager : MonoBehaviour {
         colorSettings.SetColorA(matA.GetColor(colorProp));
         matB.SetColor(colorProp, colorSettings.GetColor(ColorType.ColorB));
         colorSettings.SetColorB(matB.GetColor(colorProp));
+        OnColorsApplied?.Invoke();
     }
 }
