@@ -225,6 +225,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6001810248865802659}
     m_Modifications:
+    - target: {fileID: 2856423173073348629, guid: 36e67f56a88ee8344b27e9b224c206ea,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b185b4ee698a5024e897658dec361895,
+        type: 3}
+    - target: {fileID: 2856423173073348629, guid: 36e67f56a88ee8344b27e9b224c206ea,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.49019608
+      objectReference: {fileID: 0}
     - target: {fileID: 2856423173073348630, guid: 36e67f56a88ee8344b27e9b224c206ea,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -496,6 +507,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 832385749, guid: a6c97d66f1b105c4f995d2647d531632,
         type: 3}
+    - target: {fileID: 8660854150765312637, guid: 36e67f56a88ee8344b27e9b224c206ea,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.92156863
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 2856423171808600787, guid: 36e67f56a88ee8344b27e9b224c206ea, type: 3}

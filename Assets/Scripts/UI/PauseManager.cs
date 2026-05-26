@@ -117,6 +117,7 @@ public class PauseManager : MonoBehaviour {
     }
 
     public void ChangeScene() {
+        onPause = false;
         LoadScene.Load(sceneIndexToLoad);
     }
     #endregion
