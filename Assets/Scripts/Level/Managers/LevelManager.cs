@@ -85,12 +85,19 @@ public class LevelManager : MonoBehaviour {
         timerText.text = GeneralUtilities.FormatTime(levelTimer.CurrentTime, TimeFormat.SecondsCentiseconds);
     }
 
-    public void OnTimerComplete() {
-        Debug.Log("Time is up!");
+    public void EndLevel() {
+        levelTimer.Stop();
+        
     }
 
     void ResetLevel() {
         levelTimer.Reset();
         playerController.resetPlayer();
+    }
+
+    void SaveLevelStats() {
+        // ToDo: Save level stats like time and collectibles collected to PlayerPrefs.
+
+        PlayerPrefs.SetFloat($"Level_{LoadScene.CurrentIndexScene()}_Time", levelTimer.CurrentTime);
     }
 }

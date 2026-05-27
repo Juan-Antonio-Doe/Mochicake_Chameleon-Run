@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour {
 
             if (!isValidPrefabStage && prefabConnected) {
                 if (revalidateProperties)
-                    AssingOnValidate();
+                    AssingOnValidate(); //Variables que solo se verificaran cuando están en una escena
             }
         }
     }

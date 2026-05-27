@@ -11,7 +11,7 @@ public class ColorSettingsUI : MonoBehaviour {
     private static readonly Vector3 normalScale = Vector3.one;
 
     [field: Header("Auto-Assigned Settings")]
-    [field: SerializeField] private bool revalidateProperties { get; set; } = false;
+    [field: SerializeField] private bool revalidateProperties { get; set; }
 
     [field: Header("References")]
     [field: SerializeField, ReadOnlyField] private ColorManager colorManager { get; set; }
@@ -36,12 +36,14 @@ public class ColorSettingsUI : MonoBehaviour {
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
-            if (!isValidPrefabStage && revalidateProperties)
-                AssingOnValidate();
+            if (!isValidPrefabStage && prefabConnected) {
+                if (revalidateProperties)
+                    ValidateAssings();
+            }
         }
     }
 
-    void AssingOnValidate() {
+    void ValidateAssings() {
         if (colorManager == null)
             colorManager = FindObjectOfType<ColorManager>();
 

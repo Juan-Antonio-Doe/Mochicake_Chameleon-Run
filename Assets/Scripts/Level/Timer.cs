@@ -79,4 +79,8 @@ public class Timer {
             }
         }
     }
+
+    public float GetRawTime() {
+        return CurrentTime;
+    }
 }
