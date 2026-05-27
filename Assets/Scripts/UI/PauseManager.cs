@@ -14,11 +14,16 @@ public class PauseManager : MonoBehaviour {
 
     [field: Header("UI properties")]
     [field: SerializeField] private GameObject pauseMenu { get; set; }
+    [field: SerializeField] private float cooldownBeforeResume { get; set; } = 1f;
     //[field: SerializeField] private GameObject backgroundCanvas { get; set; }
     [field: SerializeField] private Button firstSelectedButton { get; set; }
     //[field: SerializeField] private SettingsManager _settings { get; set; }
     [SerializeField, Tooltip("Objects to disable when closing the pause menu.")]
     private List<GameObject> _objectsToDisable = new();
+
+    [field: Header("Animation properties")]
+    [field: SerializeField, ReadOnlyField] private Animator menuAnim { get; set; }
+    [field: SerializeField, ReadOnlyField] private GameObject unpauseCircleGO { get; set; }
 
     /*[field: Header("Audio properties")]
     [field: SerializeField] private AudioSource menuAudioSource { get; set; }*/
@@ -43,6 +48,11 @@ public class PauseManager : MonoBehaviour {
     }
 
     void ValidateAssings() {
+
+        if (menuAnim == null) {
+            menuAnim = GetComponentInChildren<Animator>();
+            unpauseCircleGO = menuAnim.transform.GetChild(0).gameObject;
+        }
 
         revalidateProperties = false;
     }
@@ -73,7 +83,7 @@ public class PauseManager : MonoBehaviour {
 
     // Called by the pause button event on Player Inputs.
     public void Pause() {
-        if (!onPause) {
+        /*if (!onPause) {
             onPause = true;
             Time.timeScale = 0;
             EnableDisableThings(true);
@@ -82,7 +92,8 @@ public class PauseManager : MonoBehaviour {
             onPause = false;
             EnableDisableThings(false);
             Time.timeScale = 1;
-        }
+        }*/
+        StartCoroutine(onPauseCo());
     }
 
     public void EnableDisableThings(bool enablePause) {
@@ -99,6 +110,29 @@ public class PauseManager : MonoBehaviour {
         }
 
         LevelManager.Instance.hud.SetActive(!enablePause);
+    }
+
+    IEnumerator onPauseCo() {
+        if (!onPause) {
+            onPause = true;
+            Time.timeScale = 0;
+            EnableDisableThings(true);
+            yield return null;
+        }
+        else {
+            EnableDisableThings(false);
+
+            // ToDo: Play circle animation
+            unpauseCircleGO.SetActive(true);
+            menuAnim.Play("UnpauseCooldownAnim");
+            yield return new WaitForSecondsRealtime(cooldownBeforeResume);
+            // ToDo: Stop circle animation
+            unpauseCircleGO.SetActive(false);
+            GeneralUtilities.ResetAnimators(new List<Animator>() { menuAnim }, this);
+
+            onPause = false;
+            Time.timeScale = 1;
+        }
     }
 
     #region Buttons Methods

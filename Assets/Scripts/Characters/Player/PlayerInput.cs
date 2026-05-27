@@ -32,7 +32,7 @@ public class PlayerInput : MonoBehaviour {
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
-            if (!isValidPrefabStage /*&& prefabConnected*/) {
+            if (!isValidPrefabStage && prefabConnected) {
                 if (revalidateProperties)
                     AssingOnValidate();
             }
@@ -50,6 +50,7 @@ public class PlayerInput : MonoBehaviour {
 #endif
 
     void Update() {
+        if (PauseManager.onPause) return;
         HandleScreenInput();
     }
 
