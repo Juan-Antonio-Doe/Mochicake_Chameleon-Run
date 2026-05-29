@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ColorPresets", menuName = "Scriptables/Settings/Color Presets")]
-public class ColorPresets : ScriptableObject {
+public class ColorPresetsSO : ScriptableObject {
 
     [field: Header("Color A Presets")]
     [field: SerializeField]

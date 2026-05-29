@@ -88,6 +88,8 @@ public class LevelManager : MonoBehaviour {
     public void EndLevel() {
         levelTimer.Stop();
         
+        SaveLevelStats();
+        LoadScene.Load(0);
     }
 
     void ResetLevel() {
@@ -96,8 +98,32 @@ public class LevelManager : MonoBehaviour {
     }
 
     void SaveLevelStats() {
-        // ToDo: Save level stats like time and collectibles collected to PlayerPrefs.
+        string sceneName = LoadScene.CurrentNameScene();
+        int number = -1;
+        string[] parts = sceneName.Split('_');
 
-        PlayerPrefs.SetFloat($"Level_{LoadScene.CurrentIndexScene()}_Time", levelTimer.CurrentTime);
+        // If the index of the current scene is greater than the index where the numbered levels begin...
+        if (LoadScene.CurrentIndexScene() >= 1) {
+            if (parts[0].Equals("Test")) {
+                number = -1;
+            }
+            else
+                number = int.Parse(parts[parts.Length - 1]);
+        }
+        else
+            return;
+
+        // If the current scene number is greater than the stored one, it's updated.
+        Debug.Log($"Number: {number} >= UnlokedLevels: {PlayerPrefs.GetInt("UnlokedLevels", 0)}");
+        if (number >= PlayerPrefs.GetInt("UnlokedLevels", 0))
+            PlayerPrefs.SetInt("UnlokedLevels", number + 1);
+
+
+        // ToDo: Save level stats like collectibles collected to PlayerPrefs.
+
+        if (PlayerPrefs.GetFloat($"Level_{number}_Time", 99f) > levelTimer.CurrentTime)
+            PlayerPrefs.SetFloat($"Level_{number}_Time", levelTimer.CurrentTime);
+
+        PlayerPrefs.Save();
     }
 }

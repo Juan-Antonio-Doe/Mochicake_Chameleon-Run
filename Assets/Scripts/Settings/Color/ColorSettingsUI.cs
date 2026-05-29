@@ -15,7 +15,7 @@ public class ColorSettingsUI : MonoBehaviour {
 
     [field: Header("References")]
     [field: SerializeField, ReadOnlyField] private ColorManager colorManager { get; set; }
-    [field: SerializeField] private ColorPresets presets { get; set; }
+    [field: SerializeField] private ColorPresetsSO presets { get; set; }
 
     [field: Header("Color A Buttons")]
     [field: SerializeField] private Text colorAButtonParent { get; set; }

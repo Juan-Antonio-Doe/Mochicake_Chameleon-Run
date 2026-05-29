@@ -19,15 +19,15 @@ public class PlayerInput : MonoBehaviour {
 
 #if UNITY_EDITOR
     /*
-     * Suelo usar este método para automatizar la asignación de propiedades en el inspector en tiempo de edición.
-     * Este código se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
-     * sirve para evitar que el código se ejecute constantemente. Se podría considerar dicho bool como un trigger.
+     * Suelo usar este mï¿½todo para automatizar la asignaciï¿½n de propiedades en el inspector en tiempo de ediciï¿½n.
+     * Este cï¿½digo se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
+     * sirve para evitar que el cï¿½digo se ejecute constantemente. Se podrï¿½a considerar dicho bool como un trigger.
      */
 
     void OnValidate() {
         if (!Application.isPlaying) {
 
-            // Código que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
+            // Cï¿½digo que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
@@ -55,10 +55,17 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private void HandleScreenInput() {
-#if UNITY_EDITOR || UNITY_STANDALONE
-        HandleMouseInput();
+#if UNITY_EDITOR
+        // Deberia diferenciar entre usar la ventana "Game" o la ventana "Simulator", pero solo lo hace si solo hay
+        // una ventana de estas al mismo tiempo, de lo contrario, en mi caso solo detecta "simulator" cuando tengo ambas abiertas.
+        if (UnityEngine.Device.SystemInfo.deviceType == DeviceType.Desktop)
+            HandleMouseInput();
+        else
+            HandleTouchInput();
 #elif UNITY_ANDROID
-    HandleTouchInput();
+        HandleTouchInput();
+#elif UNITY_STANDALONE
+        HandleMouseInput();
 #endif
     }
 
@@ -87,8 +94,8 @@ public class PlayerInput : MonoBehaviour {
     }
 #endif
 
-#if UNITY_ANDROID
-private void HandleTouchInput() {
+#if UNITY_EDITOR || UNITY_ANDROID
+    private void HandleTouchInput() {
     if (Input.touchCount == 0) return;
 
     Touch touch = Input.GetTouch(0);
@@ -117,27 +124,12 @@ private void HandleTouchInput() {
 }
 #endif
 
-    /*private void HandleScreenInput() {
-        if (Input.GetMouseButtonUp(0))
-            playerController.JumpReleased();
-
-        if (!Input.GetMouseButtonDown(0)) return;
-
-        bool isLeftHalf = Input.mousePosition.x < Screen.width * 0.5f;
-
-        if (MatchesMode(settings.JumpMode, isLeftHalf))
-            playerController.Jump();
-
-        if (MatchesMode(settings.ColorSwitchMode, isLeftHalf))
-            playerController.SwitchColor();
-    }*/
-
     private bool MatchesMode(InputMode mode, bool isLeftHalf) {
         return mode switch {
             InputMode.Fullscreen => true,
             InputMode.HalfLeft => isLeftHalf,
             InputMode.HalfRight => !isLeftHalf,
-            InputMode.Button => false,  // Se gestiona desde el botón UI
+            InputMode.Button => false,  // Se gestiona desde el botï¿½n UI
             _ => false
         };
     }

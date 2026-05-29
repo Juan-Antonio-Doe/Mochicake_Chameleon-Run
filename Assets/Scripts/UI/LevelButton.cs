@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class LevelButton : MonoBehaviour {
+public class LevelButton : MonoBehaviour, IBeginDragHandler,
+    IDragHandler, IEndDragHandler {
 
     [field: Header("AutoAttach on Editor properties")]
     [field: SerializeField] private bool revalidateProperties { get; set; }
@@ -17,15 +19,16 @@ public class LevelButton : MonoBehaviour {
 
     [field: Header("Button properties")]
     [field: SerializeField, ReadOnlyField, Tooltip("Setted when instancing button")] private LevelSelectMenu levelSelectMenu { get; set; }
+    [field: SerializeField, ReadOnlyField, Tooltip("Setted when instancing button")] private ScrollRect parentScrollRect { get; set; }
     [field: SerializeField, Tooltip("Level to load.")] private int level { get; set; }
     [field: SerializeField, Tooltip("Word 'level' for translations")] private string levelLabel { get; set; }
-    private int sceneIndex { get; set; }
+    //private int sceneIndex { get; set; }
 
     [field: Header("Stats properties")]
     [field: SerializeField, ReadOnlyField] private Text levelCollectiblesValueText { get; set; }
-    //private int _levelScore { get; set; }
     [field: SerializeField, ReadOnlyField] private Text levelTimeValueText { get; set; }
-    //private string _levelTime { get; set; }
+    [field: SerializeField, ReadOnlyField] private string maxCollectibles {  get; set; }
+    [field: SerializeField, ReadOnlyField] private bool isDragging { get; set; }
 
 #if UNITY_EDITOR
     void OnValidate() {
@@ -66,10 +69,12 @@ public class LevelButton : MonoBehaviour {
     }
 #endif
 
-    public void Setup(int level, bool isUnlocked, int firtLevelScenesIndex, LevelSelectMenu levelSelectMenu) {
+    public void Setup(int level, bool isUnlocked, int firtLevelScenesIndex, LevelSelectMenu levelSelectMenu, LevelData levelData) {
         this.level = level;
-        sceneIndex = firtLevelScenesIndex + level - 1;
+        //sceneIndex = firtLevelScenesIndex + level;
         levelText.text = $"{levelLabel}: {this.level}";
+        levelNameText.text = levelData.levelName;
+        maxCollectibles = levelData.maxCollectibles;
         button.interactable = isUnlocked;
         this.levelSelectMenu = levelSelectMenu;
 
@@ -79,13 +84,37 @@ public class LevelButton : MonoBehaviour {
     }
 
     public void OnClick() {
+        if (isDragging) return;
         levelSelectMenu.LoadLevel(level);
     }
 
     private void LoadDataLevel() {
-        //levelCollectiblesValueText.text = string.Format("{0:D10}", PlayerPrefs.GetInt($"Level_{sceneIndex}", 0));
-        levelCollectiblesValueText.text = PlayerPrefs.GetInt($"Level_{sceneIndex}", 0).ToString() + "/" + "10";
-        //levelTimeValueText.text = PlayerPrefs.GetString($"Level_{sceneIndex}_TimeFormatted", "0:00.000");
-        levelTimeValueText.text = GeneralUtilities.FormatTime(PlayerPrefs.GetFloat($"Level_{sceneIndex}_Time", 0f), TimeFormat.MinutesSecondsMilliseconds);
+        levelCollectiblesValueText.text = PlayerPrefs.GetInt($"Level_{level}", 0).ToString() + "/" + maxCollectibles;
+        levelTimeValueText.text = GeneralUtilities.FormatTime(PlayerPrefs.GetFloat($"Level_{level}_Time", 0f), TimeFormat.SecondsMilliseconds);
+    }
+
+    public void SetScrollRect(ScrollRect sr) {
+        parentScrollRect = sr;
+    }
+
+    // --- Drag forwarding ---
+    public void OnBeginDrag(PointerEventData eventData) {
+        isDragging = true;
+        if (parentScrollRect != null) parentScrollRect.OnBeginDrag(eventData);
+    }
+
+    public void OnDrag(PointerEventData eventData) {
+        if (parentScrollRect != null) parentScrollRect.OnDrag(eventData);
+    }
+
+    public void OnEndDrag(PointerEventData eventData) {
+        if (parentScrollRect != null) parentScrollRect.OnEndDrag(eventData);
+        
+        StartCoroutine(ResetDragFlagNextFrame()); // Small delay to prevent an immediate click from being triggered
+    }
+
+    System.Collections.IEnumerator ResetDragFlagNextFrame() {
+        yield return null;
+        isDragging = false;
     }
 }

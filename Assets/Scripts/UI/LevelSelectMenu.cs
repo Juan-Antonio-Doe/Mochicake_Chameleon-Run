@@ -1,13 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
-
-    private const string prefKeyUnlocked = "UnlockedLevels";
+public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
 
     [field: Header("Auto-Assigned Settings")]
     [field: SerializeField] private bool revalidateProperties { get; set; }
@@ -20,9 +19,13 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
     [field: SerializeField] private int firstLevelSceneIndex { get; set; } = 1;
     [field: SerializeField] private float snapSpeed { get; set; } = 10f;
 
+    [field: Header("Levels")]
+    [field: SerializeField] private LevelsDatabaseSO levelDatabase { get; set; }
+
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private int levelCount { get; set; }
     [field: SerializeField, ReadOnlyField] private int unlockedLevels { get; set; }
+    [field: SerializeField, ReadOnlyField] private List<GameObject> levelButtonInstances { get; set; } = new List<GameObject>();
 
     private float buttonWidth { get; set; }
     private Coroutine snapCoroutine { get; set; }
@@ -32,9 +35,9 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
         if (!Application.isPlaying) {
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
-            //bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
+            bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
-            if (!isValidPrefabStage/* && prefabConnected*/) {
+            if (!isValidPrefabStage && prefabConnected) {
                 if (revalidateProperties)
                     ValidateAssings();
             }
@@ -50,7 +53,7 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
 #endif
 
     void Start() {
-        unlockedLevels = PlayerPrefs.GetInt(prefKeyUnlocked, 1);
+        unlockedLevels = PlayerPrefs.GetInt("UnlokedLevels", 0);
         levelCount = SceneManager.sceneCountInBuildSettings - firstLevelSceneIndex;
 
         // Force layout rebuild so viewport rect is calculated before reading its width
@@ -61,6 +64,9 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
     }
 
     private IEnumerator SpawnLevelButtonsCo() {
+        // Add placeholder first button so the first level stays centered when selected.
+        CreatePlaceholder();
+
         for (int i = 0; i < levelCount; i++) {
             GameObject instance = Instantiate(levelButtonPrefab, scrollRect.content);
 
@@ -68,18 +74,83 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
             RectTransform rt = instance.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(buttonWidth, rt.sizeDelta.y);
 
-            int level = i + 1;
-            instance.GetComponent<LevelButton>().Setup(level, level <= unlockedLevels, firstLevelSceneIndex, this);
+            LevelButton levelButton = instance.GetComponent<LevelButton>();
+            levelButton.Setup(i, i <= unlockedLevels, firstLevelSceneIndex, this, levelDatabase.levelDatas[i]);
+            levelButton.SetScrollRect(scrollRect);
+
+            levelButtonInstances.Add(instance);
 
             yield return null;
         }
+
+        // Add placeholder last button for centering last level when selected.
+        CreatePlaceholder();
+        Canvas.ForceUpdateCanvases();
+
+        // Auto-select last level unlocked and scroll to it.
+        int indexToSelect = Mathf.Clamp(unlockedLevels - 1, 0, levelButtonInstances.Count - 1);
+        GameObject toSelect = levelButtonInstances[indexToSelect];
+
+        // Keep a button selected so mouse/gamepad navigation doesn't break.
+        EventSystem.current.SetSelectedGameObject(toSelect);
+
+        // Center the button in the viewport.
+        yield return StartCoroutine(CenterOnItemCoroutine(toSelect.GetComponent<RectTransform>()));
+    }
+
+    private void CreatePlaceholder() {
+        GameObject placeholder = new GameObject("Level placeholder", typeof(RectTransform));
+        placeholder.transform.SetParent(scrollRect.content, false);
+
+        LayoutElement le = placeholder.AddComponent<LayoutElement>();
+        le.preferredWidth = buttonWidth;
+        le.minWidth = buttonWidth;
+        le.flexibleWidth = 0;
+
+        RectTransform rt = placeholder.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(buttonWidth, 0);
+    }
+
+    private IEnumerator CenterOnItemCoroutine(RectTransform target) {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        yield return null;
+
+        RectTransform content = scrollRect.content;
+        RectTransform viewport = scrollRect.viewport;
+
+        // Center position of the target in content's local space
+        Vector2 contentLocalPos = content.localPosition;
+        Vector2 targetLocalPos = content.InverseTransformPoint(target.TransformPoint(target.rect.center));
+        Vector2 viewportLocalCenter = viewport.TransformPoint(viewport.rect.center);
+        Vector2 viewportLocalCenterInContent = content.InverseTransformPoint(viewportLocalCenter);
+
+        float difference = targetLocalPos.x - viewportLocalCenterInContent.x;
+
+        Vector2 newAnchored = content.anchoredPosition - new Vector2(difference, 0);
+
+        // Limit to content bounds
+        float contentWidth = content.rect.width;
+        float viewportWidth = viewport.rect.width;
+        float maxX = (contentWidth - viewportWidth) / 2f;
+        float minX = -maxX;
+
+        // The value is normalized to ensure it doesn't exceed the content bounds.
+        newAnchored.x = Mathf.Clamp(newAnchored.x, minX, maxX);
+
+        // Smoothly animate the scroll transition.
+        float t = 0f;
+        float duration = 0.25f;
+        Vector2 startAnchored = content.anchoredPosition;
+        while (t < duration) {
+            t += Time.unscaledDeltaTime;
+            content.anchoredPosition = Vector2.Lerp(startAnchored, newAnchored, Mathf.SmoothStep(0f, 1f, t / duration));
+            yield return null;
+        }
+        content.anchoredPosition = newAnchored;
     }
 
     // -- Scroll Snap -------------------------------------------
-
-    public void OnDrag(PointerEventData eventData) {
-        Debug.Log("Dragging");
-    }
 
     public void OnEndDrag(PointerEventData eventData) {
         float currentX = scrollRect.content.anchoredPosition.x;
@@ -116,17 +187,10 @@ public class LevelSelectMenu : MonoBehaviour, IDragHandler, IEndDragHandler {
     public void LoadLevel(int level) {
         if (level > unlockedLevels) return;
 
-        int sceneIndex = firstLevelSceneIndex + level - 1;
+        int sceneIndex = firstLevelSceneIndex + level;
         if (sceneIndex < SceneManager.sceneCountInBuildSettings)
             LoadScene.Load(sceneIndex);
         else
             Debug.LogError($"Scene index {sceneIndex} is out of range.");
-    }
-
-    public void UnlockNextLevel(int completedLevel) {
-        if (completedLevel < unlockedLevels) return;
-        unlockedLevels = completedLevel + 1;
-        PlayerPrefs.SetInt(prefKeyUnlocked, unlockedLevels);
-        PlayerPrefs.Save();
     }
 }

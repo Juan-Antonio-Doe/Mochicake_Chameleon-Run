@@ -62,19 +62,7 @@ MonoBehaviour:
         m_Calls: []
     OnComplete:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 2742735896999712034}
-          m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
-          m_MethodName: OnTimerComplete
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+        m_Calls: []
     <CurrentTime>k__BackingField: 0
     <IsRunning>k__BackingField: 0
     <IsPaused>k__BackingField: 0

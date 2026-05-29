@@ -15,9 +15,6 @@ public class Timer {
     // Countdown progress [0, 1]. Useful for UI fill bars.
     public float NormalizedTime => timeLimit > 0f ? Mathf.Clamp01(CurrentTime / timeLimit) : 0f;
 
-    /*public event Action OnStart;
-    public event Action OnStop;
-    public event Action OnComplete;*/
     [field: Header("Timer Events")]
     [field: SerializeField] public UnityEvent OnStart;
     [field: SerializeField] public UnityEvent OnStop;

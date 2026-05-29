@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -43,8 +46,8 @@ public static class GeneralUtilities {
     /// <returns></returns>
     public static int GenerateRandomNumber(int minInclusive, int maxExclusive) {
         int seed = System.DateTime.Now.Millisecond + Time.frameCount;
-        Random.InitState(seed);
-        return Random.Range(minInclusive, maxExclusive);
+        UnityEngine.Random.InitState(seed);
+        return UnityEngine.Random.Range(minInclusive, maxExclusive);
     }
 
     /// <summary>
@@ -213,7 +216,11 @@ public static class GeneralUtilities {
         };
     }
 
+    #region PlayerPrefs Utilities
 #if UNITY_EDITOR
+    private static string Company => PlayerSettings.companyName ?? "UnknownCompany";
+    private static string Product => PlayerSettings.productName ?? "UnknownProduct";
+
     /// <summary>
     /// Delete PlayerPrefs.
     /// </summary>
@@ -221,7 +228,99 @@ public static class GeneralUtilities {
     public static void DeletePlayerPrefs() {
         PlayerPrefs.DeleteAll();
     }
+
+    /// <summary>
+    /// Open PlayerPrefs location.
+    /// </summary>
+    [MenuItem("Tools/PlayerPrefs/Open PlayerPrefs location")]
+    public static void OpenPlayerPrefsFolder() {
+        // Determine platform and build the expected path or registry key.
+        if (Application.platform == RuntimePlatform.OSXEditor) {
+            // macOS: ~/Library/Preferences/unity.<Company>.<Product>.plist
+            string plistFile = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+                "Library", "Preferences",
+                $"unity.{Company}.{Product}.plist"
+            );
+
+            OpenPathOrShow(plistFile);
+        }
+        else if (Application.platform == RuntimePlatform.WindowsEditor) {
+            // Windows: PlayerPrefs are stored in the registry under HKCU\Software\<Company>\<Product>
+            string regKey = $@"HKCU\Software\Unity\UnityEditor\{Company}\{Product}";
+
+            // Copy the registry path to clipboard and open regedit.
+            GUIUtility.systemCopyBuffer = regKey;
+
+            try {
+                Process.Start("regedit.exe");
+            }
+            catch (Exception ex) {
+                EditorUtility.DisplayDialog("PlayerPrefs (Windows)",
+                    $"Failed to start regedit: {ex.Message}\nRegistry key copied to clipboard:\n{regKey}", "OK");
+                return;
+            }
+
+            EditorUtility.DisplayDialog("PlayerPrefs (Windows)",
+                $"Registry key copied to clipboard:\n{regKey}\n\nRegedit was opened. Paste the key into the address bar of regedit to navigate.", "OK");
+        }
+        else if (Application.platform == RuntimePlatform.LinuxEditor) {
+            // Linux: ~/.config/unity3d/<Company>/<Product>
+            string configPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+                ".config", "unity3d", Company, Product
+            );
+
+            OpenPathOrShow(configPath);
+        }
+        else {
+            // Other editor platforms (shouldn't normally happen)
+            EditorUtility.DisplayDialog("PlayerPrefs",
+                "This tool is intended for the Editor on macOS, Windows, or Linux. Mobile and WebGL PlayerPrefs are stored on the device/browser.", "OK");
+        }
+    }
+
+    /// <summary>
+    /// Open the folder containing the given path, or show a dialog and copy the path to clipboard if it doesn't exist.
+    /// </summary>
+    private static void OpenPathOrShow(string path) {
+        // If the exact file exists, open its containing folder. If a directory exists, open it directly.
+        bool isFile = File.Exists(path);
+        bool isDir = Directory.Exists(path);
+
+        if (isFile || isDir) {
+            string folder = isFile ? Path.GetDirectoryName(path) : path;
+
+            try {
+                if (Application.platform == RuntimePlatform.OSXEditor) {
+                    // Use 'open' on macOS
+                    Process.Start("open", $"\"{folder}\"");
+                }
+                else if (Application.platform == RuntimePlatform.LinuxEditor) {
+                    // Use xdg-open on Linux
+                    Process.Start("xdg-open", $"\"{folder}\"");
+                }
+                else {
+                    // Default to explorer on Windows (shouldn't reach here for Windows because registry is used)
+                    Process.Start("explorer.exe", $"\"{folder}\"");
+                }
+            }
+            catch (Exception ex) {
+                // If opening fails, copy path to clipboard and inform the user.
+                GUIUtility.systemCopyBuffer = folder;
+                EditorUtility.DisplayDialog("PlayerPrefs",
+                    $"Could not open folder automatically: {ex.Message}\nThe path was copied to the clipboard:\n{folder}", "OK");
+            }
+        }
+        else {
+            // Path not found: copy to clipboard and notify user so they can inspect manually.
+            GUIUtility.systemCopyBuffer = path;
+            EditorUtility.DisplayDialog("PlayerPrefs",
+                $"Path not found:\n{path}\n\nThe path has been copied to the clipboard.", "OK");
+        }
+    }
 #endif
+    #endregion
 }
 
 public enum TimeFormat {

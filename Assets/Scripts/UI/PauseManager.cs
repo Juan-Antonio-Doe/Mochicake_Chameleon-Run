@@ -148,6 +148,7 @@ public class PauseManager : MonoBehaviour {
     public void BackToLevelMenu() {
         //LoadScene.Load(0);
         sceneIndexToLoad = 0;
+        ChangeScene();
     }
 
     public void ChangeScene() {
