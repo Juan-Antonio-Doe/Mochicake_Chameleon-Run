@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class PlayerController : MonoBehaviour {
 
@@ -12,7 +14,8 @@ public class PlayerController : MonoBehaviour {
     [field: Header("Components")]
     [field: SerializeField, ReadOnlyField] private CapsuleCollider capCol { get; set; }
     [field: SerializeField, ReadOnlyField] private Rigidbody rb { get; set; }
-    [field: SerializeField, ReadOnlyField] private Renderer pRenderer { get; set; }
+    [field: SerializeField, ReadOnlyField] private Renderer[] pRenderers { get; set; } = new Renderer[0];
+    [field: SerializeField, ReadOnlyField] private Animator anim { get; set; }
     [field: SerializeField] private Transform groundCheck { get; set; }
 
     [field: Header("Movement")]
@@ -22,6 +25,14 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField] private int maxJumps { get; set; } = 2;
     [field: SerializeField] private float fallMultiplier { get; set; } = 2.5f;
     [field: SerializeField] private float lowJumpMultiplier { get; set; } = 2f;
+    [field: SerializeField, ReadOnlyField] private RotationConstraint hipsRotationConstraint {  get; set; }
+    [field: SerializeField, ReadOnlyField] private RotationConstraint spineRotationConstraint {  get; set; }
+    [field: Header("Somersault settings")]
+    [field: SerializeField, Tooltip("Total time of the hip rotation.")] private float hipsDuration { get; set; } = 0.6f;
+    [field: SerializeField, Tooltip("Fraction of the time where spine reaches {spinePeakAngle}.")] private float spinePeakTime {  get; set; } = 0.35f;
+    [field: SerializeField] private float spinePeakAngle {  get; set; } = 45f;
+    [field: SerializeField] private AnimationCurve hipsCurve {  get; set; } = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [field: SerializeField] private AnimationCurve spineCurve {  get; set; } = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [field: Header("Ground Check")]
     [field: SerializeField] private float groundCheckRadius { get; set; } = 0.1f;
@@ -29,8 +40,8 @@ public class PlayerController : MonoBehaviour {
 
     [field: Header("Color settings")]
     [field: SerializeField] private ColorType currentColor { get; set; } = ColorType.ColorA;
-    [field: SerializeField] private MaterialPropertyBlock propBlock { get; set; }
-    private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
+    [field: SerializeField, ReadOnlyField] private MaterialPropertyBlock propBlock { get; set; }
+    private static readonly int colorProp = Shader.PropertyToID("_CurrentColor");
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private ColorType startingColor { get; set; }
@@ -39,6 +50,11 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
     [field: SerializeField, ReadOnlyField] private Collider[] overlapBuffer { get; set; } = new Collider[4];
+
+    private Coroutine somersaultCoroutine { get; set; }
+    private bool alreadySomersault { get; set; }
+    private Vector3 hipsOrig {  get; set; }
+    private Vector3 spineOrig {  get; set; }
 
 #if UNITY_EDITOR
     /*
@@ -50,14 +66,14 @@ public class PlayerController : MonoBehaviour {
     void OnValidate() {
         if (!Application.isPlaying) {
 
-            // Código que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
+            // Codigo que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
             if (!isValidPrefabStage && prefabConnected) {
                 if (revalidateProperties)
-                    AssingOnValidate(); //Variables que solo se verificaran cuando están en una escena
+                    AssingOnValidate(); //Variables que solo se verificaran cuando estan en una escena
             }
         }
     }
@@ -74,8 +90,25 @@ public class PlayerController : MonoBehaviour {
         if (rb == null)
             rb = GetComponent<Rigidbody>();
 
-        if (pRenderer == null)
-            pRenderer = transform.GetChild(0).GetChild(0).GetComponent<Renderer>();
+        if (pRenderers == null || pRenderers.Length == 0) {
+            var renderersAux = transform.GetChild(0).GetChild(1).GetComponentsInChildren<Renderer>();
+
+            // Only add the affected renderers to the array.
+            pRenderers = renderersAux.Where(r => {
+                var mat = r.sharedMaterial;
+                return mat != null && mat.name.StartsWith("playerSwapColorShaderMat");
+            }).ToArray();
+        }
+
+        if (anim == null) {
+            anim = transform.GetChild(0).GetChild(1).GetComponent<Animator>();
+        }
+
+        if (hipsRotationConstraint == null) {
+            // C0 -> __Mesh__ | C1 -> Rogue_Hooded | C0(x3) ->  Rig_Medium, root, hips
+            hipsRotationConstraint = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<RotationConstraint>();
+            spineRotationConstraint = hipsRotationConstraint.transform.GetChild(0).GetComponent<RotationConstraint>();
+        }
 
         revalidateProperties = false;
     }
@@ -83,7 +116,6 @@ public class PlayerController : MonoBehaviour {
 
     void Awake() {
         propBlock = new MaterialPropertyBlock();
-        pRenderer.GetPropertyBlock(propBlock);
     }
 
     void OnEnable() {
@@ -102,7 +134,7 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate() {
         bool wasGrounded = isGrounded;
-        CheckGround();
+        anim.SetBool("IsGrounded", CheckGround());
 
         if (!wasGrounded && isGrounded) {
             jumpsRemaining = maxJumps;
@@ -138,8 +170,9 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    // ── Movement ──────────────────────────────────────────────
+    // -- Movement ----------------------------------------------
 
+    #region Movement methods
     void AutoMove() {
         Vector3 vel = rb.velocity;
         vel.z = moveSpeed;
@@ -152,6 +185,11 @@ public class PlayerController : MonoBehaviour {
             vel.y = jumpForce;
             rb.velocity = vel;
             jumpsRemaining--;
+            alreadySomersault = false;
+        }
+
+        if (jumpBuffered && jumpsRemaining == 0 && !alreadySomersault) {
+            StartSomersault();
         }
 
         jumpBuffered = false;
@@ -166,9 +204,71 @@ public class PlayerController : MonoBehaviour {
         if (extraGravity > 0f)
             rb.AddForce(Vector3.down * Physics.gravity.magnitude * extraGravity, ForceMode.Acceleration);
     }
+    #endregion
 
-    // ── Input ──────────────────────────────────────────
+    #region Extra methods
+    private void StartSomersault() {
+        if (somersaultCoroutine != null) StopCoroutine(somersaultCoroutine);
+        somersaultCoroutine = StartCoroutine(DoSomersault());
+        alreadySomersault = true;
+    }
 
+    private IEnumerator DoSomersault() {
+        if (hipsRotationConstraint == null || spineRotationConstraint == null) yield break;
+
+        Transform hips = hipsRotationConstraint.GetSource(0).sourceTransform;
+        Transform spine = spineRotationConstraint.GetSource(0).sourceTransform;
+
+        hipsOrig = hips.localEulerAngles;
+        spineOrig = spine.localEulerAngles;
+
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, hipsDuration);
+        float peakT = Mathf.Clamp01(spinePeakTime);
+
+        hipsRotationConstraint.constraintActive = true;
+        spineRotationConstraint.constraintActive = true;
+
+        while (elapsed < duration) {
+            float t = elapsed / duration; // 0..1
+
+            float hipsT = hipsCurve.Evaluate(t);
+            float spineT = spineCurve.Evaluate(t);
+
+            // HIPS: 0 -> 360 (smooth)
+            float hipsAngle = Mathf.Lerp(0f, 360f, hipsT);
+
+            // SPINE: Increase to spinePeakAngle in the first phase (0..peakT), then return to 0.
+            float spineAngle;
+            if (t <= peakT) {
+                float localT = (peakT <= 0f) ? 1f : (t / peakT);
+                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
+                spineAngle = Mathf.Lerp(0f, spinePeakAngle, localT);
+            }
+            else {
+                float localT = (1f - peakT <= 0f) ? 1f : ((t - peakT) / (1f - peakT));
+                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
+                spineAngle = Mathf.Lerp(spinePeakAngle, 0f, localT);
+            }
+
+            // Apply rotations
+            hips.localRotation = Quaternion.Euler(hipsAngle, hipsOrig.y, hipsOrig.z);
+            spine.localRotation = Quaternion.Euler(spineAngle, spineOrig.y, spineOrig.z);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Reset values to original state.
+        ResetSomersaultRotations();
+
+        somersaultCoroutine = null;
+    }
+
+    #endregion
+
+    // -- Input ------------------------------------------
+    #region Input related methods
     public void SwitchColor() {
         currentColor = currentColor == ColorType.ColorA ? ColorType.ColorB : ColorType.ColorA;
         UpdateVisuals();
@@ -178,19 +278,26 @@ public class PlayerController : MonoBehaviour {
 
     void UpdateVisuals() {
         propBlock.SetColor(colorProp, levelManager.colorManager.colorSettings.GetColor(currentColor));
-        pRenderer.SetPropertyBlock(propBlock);
+        foreach (Renderer r in pRenderers) {
+            r.SetPropertyBlock(propBlock);
+        }
     }
 
     public void Jump() {
         jumpBuffered = true;
         jumpHeld = true;
+        anim.SetTrigger("JumpTrigger");
     }
 
     public void JumpReleased() {
         jumpHeld = false;
     }
 
-    // [Test] Called by Trigger Zone when reach the end of the test level.
+    #endregion
+
+
+    #region Reset methods
+    // Called by Trigger Zone when reach the end of the test level.
     public void resetPlayer () {
         // Reset physics state
         rb.velocity = Vector3.zero;
@@ -203,10 +310,31 @@ public class PlayerController : MonoBehaviour {
         jumpBuffered = false;
         jumpHeld = false;
         jumpsRemaining = maxJumps;
+
+        if (somersaultCoroutine != null) {
+            StopCoroutine(somersaultCoroutine);
+            somersaultCoroutine = null;
+        }
+
+        alreadySomersault = false;
+        ResetSomersaultRotations();
+
+        // Reset animator
+        GeneralUtilities.ResetAnimators(new List<Animator>()  { anim }, this);
     }
 
-    // ── Checkers ──────────────────────────────────────────
+    void ResetSomersaultRotations() {
+        hipsRotationConstraint.GetSource(0).sourceTransform.localRotation = Quaternion.Euler(0f, hipsOrig.y, hipsOrig.z);
+        spineRotationConstraint.GetSource(0).sourceTransform.localRotation = Quaternion.Euler(0f, spineOrig.y, spineOrig.z);
+        hipsRotationConstraint.constraintActive = false;
+        spineRotationConstraint.constraintActive = false;
+    }
 
+    #endregion
+
+    // -- Checkers ------------------------------------------
+
+    #region Checkers methods
     bool CheckGround() {
         return isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
     }
@@ -224,5 +352,5 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
-
+    #endregion
 }
