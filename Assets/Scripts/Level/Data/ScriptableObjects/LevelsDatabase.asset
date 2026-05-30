@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelDatas:
   - <level>k__BackingField: 0
-    <levelName>k__BackingField: Tutorial
+    <levelName>k__BackingField: Training
     <maxCollectibles>k__BackingField: 5
   - <level>k__BackingField: 1
-    <levelName>k__BackingField: Training
+    <levelName>k__BackingField: Go!
     <maxCollectibles>k__BackingField: 7
   - <level>k__BackingField: 2
     <levelName>k__BackingField: End prototype

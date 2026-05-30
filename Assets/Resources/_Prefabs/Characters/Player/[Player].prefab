@@ -121,16 +121,22 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  <groundCheckRadius>k__BackingField: 0.1
+  <groundCheckRadius>k__BackingField: 0.4
   <groundMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 200
   <currentColor>k__BackingField: 0
+  <mainCam>k__BackingField: {fileID: 4298195711527034625}
+  <minFov>k__BackingField: 60
+  <maxFov>k__BackingField: 80
+  <approachTime>k__BackingField: 0.35
+  <returnTime>k__BackingField: 0.6
   <startingColor>k__BackingField: 0
   <isGrounded>k__BackingField: 0
   <jumpBuffered>k__BackingField: 0
   <jumpsRemaining>k__BackingField: 0
   <jumpHeld>k__BackingField: 0
+  <bigFall>k__BackingField: 0
   <overlapBuffer>k__BackingField:
   - {fileID: 0}
   - {fileID: 0}
@@ -313,7 +319,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7489255805346239029}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.030843586, y: -0.4995243, z: 0.030843563, w: 0.865201}
+  m_LocalRotation: {x: 0.037775513, y: -0.49952415, z: 0.021809703, w: 0.8652012}
   m_LocalPosition: {x: 8.75, y: 2.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

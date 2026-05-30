@@ -85,6 +85,7 @@ public class LevelManager : MonoBehaviour {
         timerText.text = GeneralUtilities.FormatTime(levelTimer.CurrentTime, TimeFormat.SecondsCentiseconds);
     }
 
+    // Called by EndTrigger at the end of the level (on editor).
     public void EndLevel() {
         levelTimer.Stop();
         
@@ -92,7 +93,8 @@ public class LevelManager : MonoBehaviour {
         LoadScene.Load(0);
     }
 
-    void ResetLevel() {
+    // Called by FailTrigger collider on level scenes (on editor).
+    public void ResetLevel() {
         levelTimer.Reset();
         playerController.resetPlayer();
     }

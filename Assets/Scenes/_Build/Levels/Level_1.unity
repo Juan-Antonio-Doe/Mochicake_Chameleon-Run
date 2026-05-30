@@ -722,7 +722,7 @@ PrefabInstance:
         type: 3}
       propertyPath: <onTriggerEnter>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 297764825}
+      objectReference: {fileID: 519262731}
     - target: {fileID: 401976581245486854, guid: d84a75b471a45dc4f844eef2cba09525,
         type: 3}
       propertyPath: m_LocalScale.z

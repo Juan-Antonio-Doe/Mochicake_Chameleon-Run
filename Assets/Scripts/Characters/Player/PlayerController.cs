@@ -43,18 +43,29 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private MaterialPropertyBlock propBlock { get; set; }
     private static readonly int colorProp = Shader.PropertyToID("_CurrentColor");
 
+    [field: Header("Camera")]
+    [field: SerializeField, ReadOnlyField] private Camera mainCam {  get; set; }
+    [field: SerializeField] private float minFov { get; set; } = 60f;
+    [field: SerializeField] private float maxFov { get; set; } = 80f;
+    [field: SerializeField] private float approachTime { get; set; } = 0.35f;
+    [field: SerializeField] private float returnTime { get; set; } = 0.6f;
+
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private ColorType startingColor { get; set; }
     [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; } = true;
     [field: SerializeField, ReadOnlyField] private bool jumpBuffered { get; set; }
     [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
+    [field: SerializeField, ReadOnlyField] public bool bigFall { get; set; }    // Called by trigger in scene.
     [field: SerializeField, ReadOnlyField] private Collider[] overlapBuffer { get; set; } = new Collider[4];
 
     private Coroutine somersaultCoroutine { get; set; }
     private bool alreadySomersault { get; set; }
     private Vector3 hipsOrig {  get; set; }
     private Vector3 spineOrig {  get; set; }
+
+    private float fovVelocity = 0f;
+    private float targetFov { get; set; }   
 
 #if UNITY_EDITOR
     /*
@@ -110,6 +121,9 @@ public class PlayerController : MonoBehaviour {
             spineRotationConstraint = hipsRotationConstraint.transform.GetChild(0).GetComponent<RotationConstraint>();
         }
 
+        if (mainCam == null)
+            mainCam = Camera.main;
+
         revalidateProperties = false;
     }
 #endif
@@ -130,6 +144,10 @@ public class PlayerController : MonoBehaviour {
         startingColor = currentColor;
         jumpsRemaining = maxJumps;
         //UpdateVisuals();
+    }
+
+    void Update() {
+        CameraFovOnFall();
     }
 
     void FixedUpdate() {
@@ -267,6 +285,22 @@ public class PlayerController : MonoBehaviour {
         somersaultCoroutine = null;
     }
 
+    void CameraFovOnFall() {
+        if (isGrounded && (bigFall || mainCam.fieldOfView != minFov)) {
+            bigFall = false;
+            return;
+        }
+
+        if (bigFall && !isGrounded)
+            targetFov = maxFov;
+        else
+            targetFov = minFov;
+
+        float smoothTime = (targetFov > mainCam.fieldOfView) ? approachTime : returnTime;
+
+        // Suaviza el FOV usando SmoothDamp (evita overshoot y es frame-rate independent)
+        mainCam.fieldOfView = Mathf.SmoothDamp(mainCam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+    }
     #endregion
 
     // -- Input ------------------------------------------
@@ -321,6 +355,10 @@ public class PlayerController : MonoBehaviour {
         alreadySomersault = false;
         ResetSomersaultRotations();
 
+        // Reset camera values
+        bigFall = false;
+        mainCam.fieldOfView = minFov;
+
         // Reset animator
         GeneralUtilities.ResetAnimators(new List<Animator>()  { anim }, this);
     }
@@ -356,5 +394,22 @@ public class PlayerController : MonoBehaviour {
             }
         }
     }
+
+#if UNITY_EDITOR
+    void OnDrawGizmos() {
+        if (groundCheck == null) return;
+
+        // Comprueba si hay colisión con la misma llamada que usas en runtime
+        bool onGround = isGrounded;
+
+        // Color: verde si hay colisión, rojo si no
+        Gizmos.color = onGround ? new Color(0f, 1f, 0f, 0.35f) : new Color(1f, 0f, 0f, 0.35f);
+
+        // Dibuja esfera sólida semitransparente y contorno
+        Gizmos.DrawSphere(groundCheck.position, groundCheckRadius);
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+    }
+#endif
     #endregion
 }
