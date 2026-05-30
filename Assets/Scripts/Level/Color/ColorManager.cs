@@ -12,7 +12,8 @@ public class ColorManager : MonoBehaviour {
     private Material matA { get; set; }
     private Material matB { get; set; }
 
-    private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
+    //private static readonly int colorProp = Shader.PropertyToID("_BaseColor");
+    private static readonly int colorProp = Shader.PropertyToID("_CurrentColor");
 
     public event Action OnColorsApplied;
 

@@ -35,15 +35,15 @@ public class LevelManager : MonoBehaviour {
 
 #if UNITY_EDITOR
     /*
-     * Suelo usar este método para automatizar la asignación de propiedades en el inspector en tiempo de edición.
-     * Este código se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
-     * sirve para evitar que el código se ejecute constantemente. Se podría considerar dicho bool como un trigger.
+     * Suelo usar este metodo para automatizar la asignacion de propiedades en el inspector en tiempo de edicion.
+     * Este codigo se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
+     * sirve para evitar que el codigo se ejecute constantemente. Se podria considerar dicho bool como un trigger.
      */
 
     void OnValidate() {
         if (!Application.isPlaying) {
 
-            // Código que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
+            // Codigo que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
@@ -114,7 +114,7 @@ public class LevelManager : MonoBehaviour {
             return;
 
         // If the current scene number is greater than the stored one, it's updated.
-        Debug.Log($"Number: {number} >= UnlokedLevels: {PlayerPrefs.GetInt("UnlokedLevels", 0)}");
+        //Debug.Log($"Number: {number} >= UnlokedLevels: {PlayerPrefs.GetInt("UnlokedLevels", 0)}");
         if (number >= PlayerPrefs.GetInt("UnlokedLevels", 0))
             PlayerPrefs.SetInt("UnlokedLevels", number + 1);
 

@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField] private Transform groundCheck { get; set; }
 
     [field: Header("Movement")]
-    [field: SerializeField] private float moveSpeed { get; set; } = 8f;
+    [field: SerializeField] private float moveSpeed { get; set; } = 12f;
     [field: SerializeField] private float jumpForce { get; set; } = 10f;
     [field: Header("Jump")]
     [field: SerializeField] private int maxJumps { get; set; } = 2;
@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour {
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private ColorType startingColor { get; set; }
-    [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; }
+    [field: SerializeField, ReadOnlyField] private bool isGrounded { get; set; } = true;
     [field: SerializeField, ReadOnlyField] private bool jumpBuffered { get; set; }
     [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
@@ -134,7 +134,7 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate() {
         bool wasGrounded = isGrounded;
-        anim.SetBool("IsGrounded", CheckGround());
+        CheckGround();
 
         if (!wasGrounded && isGrounded) {
             jumpsRemaining = maxJumps;
@@ -177,6 +177,8 @@ public class PlayerController : MonoBehaviour {
         Vector3 vel = rb.velocity;
         vel.z = moveSpeed;
         rb.velocity = vel;
+
+        //anim.SetFloat("VelocityY", rb.velocity.y);
     }
 
     void HandleJump() {
@@ -336,7 +338,9 @@ public class PlayerController : MonoBehaviour {
 
     #region Checkers methods
     bool CheckGround() {
-        return isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundMask);
+        anim.SetBool("IsGrounded", isGrounded);
+        return isGrounded;
     }
     void CheckPlatformColorMismatch() {
         if (!isGrounded) return;
