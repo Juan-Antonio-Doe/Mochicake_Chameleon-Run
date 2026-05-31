@@ -71,4 +71,9 @@ public class MainMenuManager : MonoBehaviour {
         levelSelectMenu.UpdateLevelData();
         colorSettingsUI.RefreshButtonsAfterClearData();
     }
+
+    // Called by "Confirm_btn" showed when tapping on Exit_btn.
+    public void CloseGame() {
+        GeneralUtilities.CloseGame();
+    }
 }

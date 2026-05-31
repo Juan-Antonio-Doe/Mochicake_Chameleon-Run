@@ -321,6 +321,35 @@ public static class GeneralUtilities {
     }
 #endif
     #endregion
+
+    /// <summary>
+    /// Manages the game shutdown on Android or Unity Standalone.
+    /// </summary>
+    public static void CloseGame() {
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#elif UNITY_ANDROID
+        try {
+            using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
+                var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                // Try to send it to the background first.
+                activity.Call("moveTaskToBack", true);
+                // Try to finish the Activity (finish)
+                activity.Call("finish");
+                // finishAffinity to close the entire task (API 16+)
+                try {
+                    activity.Call("finishAffinity");
+                } catch { /* ignore si no está disponible */ }
+            }
+        } catch {
+            // Fallback: close the process.
+            Application.Quit();
+        }
+#else
+        // Standalone (Windows, Mac, Linux) and others
+        Application.Quit();
+#endif
+    }
 }
 
 public enum TimeFormat {
