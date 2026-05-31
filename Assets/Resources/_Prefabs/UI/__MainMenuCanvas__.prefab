@@ -758,6 +758,7 @@ MonoBehaviour:
   <mainMenu>k__BackingField: {fileID: 8657670642033136855}
   <levelSelectMenuGO>k__BackingField: {fileID: 5227466701245876180}
   <levelSelectMenu>k__BackingField: {fileID: 4402226283653691209}
+  <colorSettingsUI>k__BackingField: {fileID: 7661047141825342955}
   <inputLayoutText>k__BackingField: {fileID: 4760756657171596295}
   <inputSettings>k__BackingField: {fileID: 11400000, guid: 2303e68c54e04594bbecb691d719c70e,
     type: 2}
@@ -823,6 +824,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7661047141825342955 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8921627826803077675, guid: e957bc4a61bd3164caad7fee961c0e04,
+    type: 3}
+  m_PrefabInstance: {fileID: 1269589533500055488}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2967874523666983764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3eb39b53673c1140b14fbbbb48b3c68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8657670642033136855 stripped

@@ -11,6 +11,7 @@ public class MainMenuManager : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private GameObject mainMenu { get; set; }
     [field: SerializeField, ReadOnlyField] private GameObject levelSelectMenuGO { get; set; }
     [field: SerializeField, ReadOnlyField] private LevelSelectMenu levelSelectMenu {  get; set; }
+    [field: SerializeField, ReadOnlyField] private ColorSettingsUI colorSettingsUI {  get; set; }
 
     [field: Header("Settings UI")]
     [field: SerializeField] private Text inputLayoutText { get; set; }
@@ -40,6 +41,9 @@ public class MainMenuManager : MonoBehaviour {
         if (levelSelectMenu == null)
             levelSelectMenu = GetComponent<LevelSelectMenu>();
 
+        if (colorSettingsUI == null)
+            colorSettingsUI = GetComponent<ColorSettingsUI>();
+
         revalidateProperties = false;
     }
 #endif
@@ -65,5 +69,6 @@ public class MainMenuManager : MonoBehaviour {
     public void ClearPlayerPrefsData() {
         GeneralUtilities.DeletePlayerPrefs();
         levelSelectMenu.UpdateLevelData();
+        colorSettingsUI.RefreshButtonsAfterClearData();
     }
 }

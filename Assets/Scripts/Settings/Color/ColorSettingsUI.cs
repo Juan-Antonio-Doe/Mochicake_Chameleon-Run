@@ -112,4 +112,9 @@ public class ColorSettingsUI : MonoBehaviour {
         buttons[oldIndex].transform.localScale = normalScale;
         buttons[newIndex].transform.localScale = selectedScale;
     }
+
+    public void RefreshButtonsAfterClearData() {
+        SelectColorA(PlayerPrefs.GetInt(prefKeyA, 0), save: false);
+        SelectColorB(PlayerPrefs.GetInt(prefKeyB, 0), save: false);
+    }
 }
