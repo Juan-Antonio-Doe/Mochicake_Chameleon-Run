@@ -57,6 +57,10 @@ public class MainMenuManager : MonoBehaviour {
             inputLayoutText.text = inputSettings.JumpMode == InputMode.HalfLeft ? "J | C" : "C | J";
     }
 
+    void Start() {
+        GameEvents.StartCleanup(this);
+    }
+
     // Called by 'ClearData_Btn' on Settings Menu UI.
     public void ClearPlayerPrefsData() {
         GeneralUtilities.DeletePlayerPrefs();

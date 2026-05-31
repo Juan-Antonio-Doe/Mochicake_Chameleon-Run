@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 public class CollectiblePickable : Collectible {
 
@@ -51,11 +46,31 @@ public class CollectiblePickable : Collectible {
 
     void ResetStatus() {
         if (!IsAlreadyCollectedAndSaved()) {
-            if (gameObject) // To avoid a "trying to access a destroyed object" exception.
-                if (!gameObject.activeInHierarchy)
-                    gameObject.SetActive(true);
+            // To avoid a "MissingReferenceException: The object of type 'CollectiblePickable' has been destroyed but you are still trying to access it."
+            // exception. That seems to keep happening...
+            if (this != null)
+                if (gameObject != null) 
+                    if (!gameObject.activeInHierarchy)
+                        gameObject.SetActive(true);
             isPicked = false;
         }
+
+        /*
+         * Debugueando:
+         * El bug de la exception se puede reproducir asi:
+         * - Completar un nivel con alguna estrella recogida (no todas).
+         * - Volver a cargar el nivel y recolectar alguna otra estrella.
+         * - Fallar el nivel despues de recolectar la estrella.
+         * - Exception.
+         * 
+         * Imagino que puede ser devido a una fuga de la suscripcion a OnPlayerFailed += ResetStatus;
+         * pero no deberia ocurrir porque el objeto:
+         *   - O no deberia estar destruido.
+         *   - O si lo esta, deberia haberse desuscrito.
+         *   
+         * Ya deberia estar arreglado con la actualizacion de GameEvents.cs
+         *   - Haciendo una limpieza cada vez que se pasa por la escena del menu principal.
+         */
     }
 
     protected bool IsAlreadyCollectedAndSaved() {

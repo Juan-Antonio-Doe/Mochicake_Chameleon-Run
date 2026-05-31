@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private Rigidbody rb { get; set; }
     [field: SerializeField, ReadOnlyField] private Renderer[] pRenderers { get; set; } = new Renderer[0];
     [field: SerializeField, ReadOnlyField] private Animator anim { get; set; }
+    [field: SerializeField, ReadOnlyField] private ParticleSystem runningDust_vfx { get; set; }
     [field: SerializeField, ReadOnlyField] public AudioSource pAudioSource { get; private set; }
     [field: SerializeField] private Transform groundCheck { get; set; }
 
@@ -129,6 +130,9 @@ public class PlayerController : MonoBehaviour {
         if (pAudioSource == null)
             pAudioSource = GetComponent<AudioSource>();
 
+        if (runningDust_vfx == null)
+            runningDust_vfx = GetComponentInChildren<ParticleSystem>();
+
         revalidateProperties = false;
     }
 #endif
@@ -153,6 +157,13 @@ public class PlayerController : MonoBehaviour {
 
     void Update() {
         CameraFovOnFall();
+
+        if (isGrounded && rb.velocity.sqrMagnitude > 1f && !runningDust_vfx.isPlaying) {
+            runningDust_vfx.Play();
+        }
+        else if ((!isGrounded || rb.velocity.sqrMagnitude < 1f) && runningDust_vfx.isPlaying) {
+            runningDust_vfx.Stop();
+        }
     }
 
     void FixedUpdate() {
@@ -322,6 +333,11 @@ public class PlayerController : MonoBehaviour {
         foreach (Renderer r in pRenderers) {
             r.SetPropertyBlock(propBlock);
         }
+
+        MaterialPropertyBlock tmp = new MaterialPropertyBlock();
+        pRenderers[0].GetPropertyBlock(tmp);
+        ParticleSystem.MainModule main = runningDust_vfx.main;
+        main.startColor = tmp.GetColor(colorProp);
     }
 
     public void Jump() {
