@@ -87,8 +87,20 @@ public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
         CreatePlaceholder();
         Canvas.ForceUpdateCanvases();
 
-        // Auto-select last level unlocked and scroll to it.
-        int indexToSelect = Mathf.Clamp(unlockedLevels - 1, 0, levelButtonInstances.Count - 1);
+        // Auto-select last level played (fallback to last unlocked) and scroll to it.
+        int savedLastPlayed = PlayerPrefs.GetInt("LastPlayedLevel", -1);
+        savedLastPlayed = Mathf.Min(savedLastPlayed, unlockedLevels);
+
+        int indexToSelect;
+
+        if (savedLastPlayed >= 0 && savedLastPlayed < levelCount) {
+            indexToSelect = Mathf.Clamp(savedLastPlayed, 0, levelButtonInstances.Count - 1);
+        }
+        else {
+            // Fallback: select last level unlocked
+            indexToSelect = Mathf.Clamp(unlockedLevels - 1, 0, levelButtonInstances.Count - 1);
+        }
+
         GameObject toSelect = levelButtonInstances[indexToSelect];
 
         // Keep a button selected so mouse/gamepad navigation doesn't break.

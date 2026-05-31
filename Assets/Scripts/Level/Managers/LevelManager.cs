@@ -20,18 +20,23 @@ public class LevelManager : MonoBehaviour {
     //[field: SerializeField, ReadOnlyField] public PauseManager pauseManager { get; private set; }
 
     [field: Header("Level Properties")]
+    [field: Header("Timer")]
     [field: SerializeField] private Timer levelTimer { get; set; } = new Timer();
-
+    [field: Header("Collectibles")]
+    [field: SerializeField, Tooltip("Enable revalidateProperties to fill array with children")] 
+    private Transform collectiblesParent {  get; set; }
+    [field: SerializeField, ReadOnlyField] private CollectiblePickable[] collectibles {  get; set; }
 
     [field: Header("Level UI Properties")]
     [field: SerializeField] public GameObject hud { get; set; }
     [field: SerializeField] private Text timerText { get; set; }
 
     /*[field: Header("End Level")]
-    [field: SerializeField] private UnityEvent onLevelEnd { get; set; }
+    [field: SerializeField] private UnityEvent onLevelEnd { get; set; }*/
 
     [field: Header("Debug")]
-    [field: SerializeField, ReadOnlyField] private bool isLevelOnGoingDebug { get; set; }*/
+    //[field: SerializeField, ReadOnlyField] private bool isLevelOnGoingDebug { get; set; }
+    [field: SerializeField, ReadOnlyField] public int collectiblesCollected { get; set; }
 
 #if UNITY_EDITOR
     /*
@@ -64,6 +69,10 @@ public class LevelManager : MonoBehaviour {
         if (colorManager == null)
             colorManager = FindObjectOfType<ColorManager>();
 
+        if (collectiblesParent != null) {
+            collectibles = collectiblesParent.GetComponentsInChildren<CollectiblePickable>();
+        }
+
         revalidateProperties = false;
     }
 #endif
@@ -73,11 +82,18 @@ public class LevelManager : MonoBehaviour {
             Instance = this;
     }
 
-    void OnEnable() => GameEvents.OnPlayerFailed += ResetLevel;
-    void OnDisable() => GameEvents.OnPlayerFailed -= ResetLevel;
+    void OnEnable() {
+        GameEvents.OnPlayerFailed += ResetLevel;
+    }
+
+    void OnDisable() {
+        GameEvents.OnPlayerFailed -= ResetLevel;
+    }
 
     void Start() {
         levelTimer.Start();
+        PlayerPrefs.SetInt("LastPlayedLevel", GetLevelNumber());
+        PlayerPrefs.Save();
     }
 
     void Update() {
@@ -88,29 +104,30 @@ public class LevelManager : MonoBehaviour {
     // Called by EndTrigger at the end of the level (on editor).
     public void EndLevel() {
         levelTimer.Stop();
+        GameEvents.TriggerLevelCompleted();
         
         SaveLevelStats();
         LoadScene.Load(0);
     }
 
-    // Called by FailTrigger collider on level scenes (on editor).
-    public void ResetLevel() {
+    void ResetLevel() {
         levelTimer.Reset();
         playerController.resetPlayer();
     }
 
+    // Called by FailTrigger collider on level scenes (on editor).
+    public void FellOutOfBounds() {
+        GameEvents.TriggerPlayerFailed();
+    }
+
     void SaveLevelStats() {
-        string sceneName = LoadScene.CurrentNameScene();
-        int number = -1;
-        string[] parts = sceneName.Split('_');
+        int number = GetLevelNumber();
 
         // If the index of the current scene is greater than the index where the numbered levels begin...
         if (LoadScene.CurrentIndexScene() >= 1) {
-            if (parts[0].Equals("Test")) {
+            if (LoadScene.CurrentNameScene().Split('_')[0].Equals("Test")) {
                 number = -1;
             }
-            else
-                number = int.Parse(parts[parts.Length - 1]);
         }
         else
             return;
@@ -121,11 +138,23 @@ public class LevelManager : MonoBehaviour {
             PlayerPrefs.SetInt("UnlokedLevels", number + 1);
 
 
-        // ToDo: Save level stats like collectibles collected to PlayerPrefs.
+        // Save level stats like collectibles collected, level time and last level played to PlayerPrefs.
+        foreach (CollectiblePickable c in collectibles) {
+            if (c.isPicked) {
+                collectiblesCollected++;
+            }
+        }
+
+        PlayerPrefs.SetInt($"Level_{number}_CollectedTotal", collectiblesCollected);
 
         if (PlayerPrefs.GetFloat($"Level_{number}_Time", 99f) > levelTimer.CurrentTime)
             PlayerPrefs.SetFloat($"Level_{number}_Time", levelTimer.CurrentTime);
 
         PlayerPrefs.Save();
+    }
+
+    private static int GetLevelNumber() {
+        string[] parts = LoadScene.CurrentNameScene().Split('_');
+        return int.Parse(parts[parts.Length - 1]);
     }
 }

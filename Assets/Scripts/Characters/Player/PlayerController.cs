@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private Rigidbody rb { get; set; }
     [field: SerializeField, ReadOnlyField] private Renderer[] pRenderers { get; set; } = new Renderer[0];
     [field: SerializeField, ReadOnlyField] private Animator anim { get; set; }
+    [field: SerializeField, ReadOnlyField] public AudioSource pAudioSource { get; private set; }
     [field: SerializeField] private Transform groundCheck { get; set; }
 
     [field: Header("Movement")]
@@ -68,6 +69,7 @@ public class PlayerController : MonoBehaviour {
     private float targetFov { get; set; }   
 
 #if UNITY_EDITOR
+    
     /*
      * Suelo usar este método para automatizar la asignación de propiedades en el inspector en tiempo de edición.
      * Este código se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
@@ -123,6 +125,9 @@ public class PlayerController : MonoBehaviour {
 
         if (mainCam == null)
             mainCam = Camera.main;
+
+        if (pAudioSource == null)
+            pAudioSource = GetComponent<AudioSource>();
 
         revalidateProperties = false;
     }

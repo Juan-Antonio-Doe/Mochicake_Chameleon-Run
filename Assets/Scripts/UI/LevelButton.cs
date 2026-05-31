@@ -38,7 +38,7 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
         bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
 
         if (!isValidPrefabStage && prefabConnected) {
-            //Variables que solo se verificaran cuando están en una escena cuando se active el trigger `revalidateProperties` para evitar bucles en el editor.
+            //Variables que solo se verificaran cuando estï¿½n en una escena cuando se active el trigger `revalidateProperties` para evitar bucles en el editor.
             if (revalidateProperties)
                 AssignComponents();
     }
@@ -89,7 +89,7 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
     }
 
     private void LoadDataLevel() {
-        levelCollectiblesValueText.text = PlayerPrefs.GetInt($"Level_{level}", 0).ToString() + "/" + maxCollectibles;
+        levelCollectiblesValueText.text = PlayerPrefs.GetInt($"Level_{level}_CollectedTotal", 0).ToString() + "/" + maxCollectibles;
         levelTimeValueText.text = GeneralUtilities.FormatTime(PlayerPrefs.GetFloat($"Level_{level}_Time", 0f), TimeFormat.SecondsMilliseconds);
     }
 
