@@ -20,7 +20,7 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
     [field: Header("Button properties")]
     [field: SerializeField, ReadOnlyField, Tooltip("Setted when instancing button")] private LevelSelectMenu levelSelectMenu { get; set; }
     [field: SerializeField, ReadOnlyField, Tooltip("Setted when instancing button")] private ScrollRect parentScrollRect { get; set; }
-    [field: SerializeField, Tooltip("Level to load.")] private int level { get; set; }
+    [field: SerializeField, Tooltip("Level to load.")] public int level { get; private set; }
     [field: SerializeField, Tooltip("Word 'level' for translations")] private string levelLabel { get; set; }
     //private int sceneIndex { get; set; }
 
@@ -91,6 +91,13 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
     private void LoadDataLevel() {
         levelCollectiblesValueText.text = PlayerPrefs.GetInt($"Level_{level}_CollectedTotal", 0).ToString() + "/" + maxCollectibles;
         levelTimeValueText.text = GeneralUtilities.FormatTime(PlayerPrefs.GetFloat($"Level_{level}_Time", 0f), TimeFormat.SecondsMilliseconds);
+    }
+
+    public void RefreshData(bool isUnlocked) {
+        button.interactable = isUnlocked;
+        lockImage.enabled = !isUnlocked;
+        statsPanel.SetActive(isUnlocked);
+        LoadDataLevel();
     }
 
     public void SetScrollRect(ScrollRect sr) {

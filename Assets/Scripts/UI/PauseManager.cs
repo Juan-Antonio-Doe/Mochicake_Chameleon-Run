@@ -21,6 +21,10 @@ public class PauseManager : MonoBehaviour {
     [SerializeField, Tooltip("Objects to disable when closing the pause menu.")]
     private List<GameObject> _objectsToDisable = new();
 
+    [field: Header("Settings UI")]
+    [field: SerializeField] private Text inputLayoutText { get; set; }
+    [field: SerializeField] private InputSettings inputSettings { get; set; }
+
     [field: Header("Animation properties")]
     [field: SerializeField, ReadOnlyField] private Animator menuAnim { get; set; }
     [field: SerializeField, ReadOnlyField] private GameObject unpauseCircleGO { get; set; }
@@ -58,6 +62,11 @@ public class PauseManager : MonoBehaviour {
     }
 #endif
 
+    void Start() {
+        if (inputLayoutText && inputSettings)
+            inputLayoutText.text = inputSettings.JumpMode == InputMode.HalfLeft ? "J | C" : "C | J";
+    }
+
     void Update() {
         if (onPause) {
             // Select the last selected button if no button is selected (for keyboard/gamepad navigation).
@@ -83,16 +92,6 @@ public class PauseManager : MonoBehaviour {
 
     // Called by the pause button event on Player Inputs.
     public void Pause() {
-        /*if (!onPause) {
-            onPause = true;
-            Time.timeScale = 0;
-            EnableDisableThings(true);
-        }
-        else {
-            onPause = false;
-            EnableDisableThings(false);
-            Time.timeScale = 1;
-        }*/
         StartCoroutine(onPauseCo());
     }
 
@@ -122,11 +121,11 @@ public class PauseManager : MonoBehaviour {
         else {
             EnableDisableThings(false);
 
-            // ToDo: Play circle animation
+            // Play circle animation
             unpauseCircleGO.SetActive(true);
             menuAnim.Play("UnpauseCooldownAnim");
             yield return new WaitForSecondsRealtime(cooldownBeforeResume);
-            // ToDo: Stop circle animation
+            // Stop circle animation
             unpauseCircleGO.SetActive(false);
             GeneralUtilities.ResetAnimators(new List<Animator>() { menuAnim }, this);
 

@@ -25,7 +25,7 @@ public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private int levelCount { get; set; }
     [field: SerializeField, ReadOnlyField] private int unlockedLevels { get; set; }
-    [field: SerializeField, ReadOnlyField] private List<GameObject> levelButtonInstances { get; set; } = new List<GameObject>();
+    [field: SerializeField, ReadOnlyField] private List<LevelButton> levelButtonInstances { get; set; } = new List<LevelButton>();
 
     private float buttonWidth { get; set; }
     private Coroutine snapCoroutine { get; set; }
@@ -78,7 +78,7 @@ public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
             levelButton.Setup(i, i <= unlockedLevels, firstLevelSceneIndex, this, levelDatabase.levelDatas[i]);
             levelButton.SetScrollRect(scrollRect);
 
-            levelButtonInstances.Add(instance);
+            levelButtonInstances.Add(levelButton);
 
             yield return null;
         }
@@ -101,7 +101,7 @@ public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
             indexToSelect = Mathf.Clamp(unlockedLevels - 1, 0, levelButtonInstances.Count - 1);
         }
 
-        GameObject toSelect = levelButtonInstances[indexToSelect];
+        GameObject toSelect = levelButtonInstances[indexToSelect].gameObject;
 
         // Keep a button selected so mouse/gamepad navigation doesn't break.
         EventSystem.current.SetSelectedGameObject(toSelect);
@@ -204,5 +204,12 @@ public class LevelSelectMenu : MonoBehaviour, IEndDragHandler {
             LoadScene.Load(sceneIndex);
         else
             Debug.LogError($"Scene index {sceneIndex} is out of range.");
+    }
+
+    public void UpdateLevelData() {
+        unlockedLevels = PlayerPrefs.GetInt("UnlokedLevels", 0);
+        foreach (LevelButton lBtn in levelButtonInstances) {
+            lBtn.RefreshData(lBtn.level <= unlockedLevels);
+        }
     }
 }
