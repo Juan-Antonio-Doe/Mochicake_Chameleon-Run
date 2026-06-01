@@ -69,7 +69,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 8844ca0f15e303a4298e6272ee3f1f14, type: 3}
-    m_FontSize: 30
+    m_FontSize: 35
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -163,11 +163,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 8844ca0f15e303a4298e6272ee3f1f14, type: 3}
-    m_FontSize: 25
+    m_FontSize: 32
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
-    m_MaxSize: 40
+    m_MaxSize: 62
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -236,12 +236,13 @@ MonoBehaviour:
   <lockImage>k__BackingField: {fileID: 6385600599881261446}
   <statsPanel>k__BackingField: {fileID: 8473719718733431671}
   <levelSelectMenu>k__BackingField: {fileID: 0}
+  <parentScrollRect>k__BackingField: {fileID: 0}
   <level>k__BackingField: 0
-  <lockedSprite>k__BackingField: {fileID: 879418217, guid: 48a498dabe5af3a43b34074b2a7032ef,
-    type: 3}
   <levelLabel>k__BackingField: Level
   <levelCollectiblesValueText>k__BackingField: {fileID: 2850201698436068326}
   <levelTimeValueText>k__BackingField: {fileID: 7544578243538907537}
+  <maxCollectibles>k__BackingField: 
+  <isDragging>k__BackingField: 0
 --- !u!114 &5590552046546797344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -749,7 +750,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 8844ca0f15e303a4298e6272ee3f1f14, type: 3}
-    m_FontSize: 25
+    m_FontSize: 32
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -894,11 +895,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 8844ca0f15e303a4298e6272ee3f1f14, type: 3}
-    m_FontSize: 30
+    m_FontSize: 35
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
-    m_MaxSize: 40
+    m_MaxSize: 300
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
