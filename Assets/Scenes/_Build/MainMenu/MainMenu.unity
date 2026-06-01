@@ -96,7 +96,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 3139e31448eaeea49bc64b84519a5318,
+    type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -214,13 +215,13 @@ GameObject:
   m_Component:
   - component: {fileID: 103578944}
   - component: {fileID: 103578945}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Global Volume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &103578944
 Transform:
   m_ObjectHideFlags: 0
@@ -402,8 +403,7 @@ MonoBehaviour:
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
-  m_Cameras:
-  - {fileID: 3621995613446835042}
+  m_Cameras: []
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2
@@ -478,7 +478,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 50231
+    m_Bits: 50229
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -521,7 +521,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1160234426
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -996,21 +996,36 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1684093887807601288, guid: ce7c20bbff6268a40a462c45b50cb8ab,
+        type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 457
+      objectReference: {fileID: 0}
+    - target: {fileID: 4789026510212347967, guid: ce7c20bbff6268a40a462c45b50cb8ab,
+        type: 3}
+      propertyPath: m_Cameras.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4789026510212347967, guid: ce7c20bbff6268a40a462c45b50cb8ab,
+        type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4789026510212347967, guid: ce7c20bbff6268a40a462c45b50cb8ab,
+        type: 3}
+      propertyPath: m_VolumeLayerMask.m_Bits
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8337575749667159091, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
     - {fileID: 3310893152850855510, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
     m_RemovedGameObjects:
     - {fileID: 5590269586529202214, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
     - {fileID: 6774302996542111158, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
+    - {fileID: 6316847722222243626, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce7c20bbff6268a40a462c45b50cb8ab, type: 3}
---- !u!20 &3621995613446835042 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 1684093887807601288, guid: ce7c20bbff6268a40a462c45b50cb8ab,
-    type: 3}
-  m_PrefabInstance: {fileID: 3621995613446835041}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6343871991492976297
 PrefabInstance:
   m_ObjectHideFlags: 0

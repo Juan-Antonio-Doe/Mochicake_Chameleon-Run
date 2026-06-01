@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 6956e6e3048db0745936dcbc58ce4099, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 582066230}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -96,7 +96,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: fbe0003a19cfc1a4c8fa354f4fe154ca,
+    type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -200,6 +201,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9069599554069184947, guid: 6b5edebe3e7aa354aa63ce14ddf41d75,
     type: 3}
   m_PrefabInstance: {fileID: 50034046}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &92678670 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 5247125696837680590, guid: 8af422f9bf4a54244bd0755ccaf9e561,
+    type: 3}
+  m_PrefabInstance: {fileID: 1774320644}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &119089560
 PrefabInstance:
@@ -1242,6 +1249,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cd3358119bdbd8444ac00dac1f6f1ccb, type: 3}
+--- !u!108 &582066230 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 1569394327013983033, guid: cd3358119bdbd8444ac00dac1f6f1ccb,
+    type: 3}
+  m_PrefabInstance: {fileID: 582066229}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &586424257
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1759,6 +1772,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6305820534624226149, guid: d84a75b471a45dc4f844eef2cba09525,
+        type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 92678670}
     - target: {fileID: 6766197546734440131, guid: d84a75b471a45dc4f844eef2cba09525,
         type: 3}
       propertyPath: m_LocalScale.z
