@@ -7,24 +7,11 @@ using UnityEngine.SceneManagement;
 
 public static class LoadScene {
 
+    #region Normal load methods
     /// <summary> Load a scene by name. </summary>
     public static void Load(string nextScene) {
         CommonLoad();
         SceneManager.LoadScene(LoadingData.sceneToLoad = nextScene);
-    }
-
-    public static string CurrentNameScene() {
-        return SceneManager.GetActiveScene().name;
-    }
-
-    public static int CurrentIndexScene() {
-        return SceneManager.GetActiveScene().buildIndex;
-    }
-
-    private static void CommonLoad() {
-        LoadingData.previousScene = CurrentNameScene();
-        Time.timeScale = 1;
-        //PauseManager.SetOnPause(false);
     }
 
     /// <summary> Load a scene by index. </summary>
@@ -45,6 +32,22 @@ public static class LoadScene {
             SceneManager.LoadScene(LoadingData.sceneToLoad = SceneManager.GetSceneByBuildIndex(0).name);
         }
     }
+    #endregion
+
+    #region Utility methods
+    public static string CurrentNameScene() {
+        return SceneManager.GetActiveScene().name;
+    }
+
+    public static int CurrentIndexScene() {
+        return SceneManager.GetActiveScene().buildIndex;
+    }
+
+    private static void CommonLoad() {
+        LoadingData.previousScene = CurrentNameScene();
+        Time.timeScale = 1;
+        //PauseManager.SetOnPause(false);
+    }
 
     /// <summary> Check if the scene index is valid. </summary>
     public static bool IsValidScene(int index) {
@@ -57,7 +60,9 @@ public static class LoadScene {
         else
             return false;
     }
+    #endregion
 
+    #region Async Methods
     private static AsyncOperation asyncOperation;
 
     /// <summary> Preload a scene by name. </summary>
@@ -80,4 +85,5 @@ public static class LoadScene {
             Debug.LogWarning("There is no scene preloaded.");
         }
     }
+    #endregion
 }

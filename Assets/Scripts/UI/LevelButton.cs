@@ -97,6 +97,7 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
         LoadDataLevel();
     }
 
+    // Called by the button itself.
     public void OnClick() {
         if (isDragging) return;
         levelSelectMenu.LoadLevel(level);
@@ -114,6 +115,7 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
         LoadDataLevel();
     }
 
+    #region UI related methods
     public void SetScrollRect(ScrollRect sr) {
         parentScrollRect = sr;
     }
@@ -138,4 +140,5 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
         yield return null;
         isDragging = false;
     }
+    #endregion
 }

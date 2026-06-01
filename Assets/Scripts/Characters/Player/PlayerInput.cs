@@ -19,15 +19,15 @@ public class PlayerInput : MonoBehaviour {
 
 #if UNITY_EDITOR
     /*
-     * Suelo usar este m�todo para automatizar la asignaci�n de propiedades en el inspector en tiempo de edici�n.
-     * Este c�digo se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
-     * sirve para evitar que el c�digo se ejecute constantemente. Se podr�a considerar dicho bool como un trigger.
+     * Suelo usar este metodo para automatizar la asignacion de propiedades en el inspector en tiempo de edicion.
+     * Este codigo se ejecuta cuando se modifica un componente en el inspector. La propiedad `revalidateProperties`
+     * sirve para evitar que el codigo se ejecute constantemente. Se podria considerar dicho bool como un trigger.
      */
 
     void OnValidate() {
         if (!Application.isPlaying) {
 
-            // C�digo que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
+            // Codigo que evita que el OnValidate se ejecute en Prefab Stages provocando bucles en el editor.
             UnityEditor.SceneManagement.PrefabStage prefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
             bool isValidPrefabStage = prefabStage != null && prefabStage.stageHandle.IsValid();
             bool prefabConnected = PrefabUtility.GetPrefabInstanceStatus(this.gameObject) == PrefabInstanceStatus.Connected;
@@ -54,6 +54,7 @@ public class PlayerInput : MonoBehaviour {
         HandleScreenInput();
     }
 
+    #region Input Methods
     private void HandleScreenInput() {
 #if UNITY_EDITOR
         // Deberia diferenciar entre usar la ventana "Game" o la ventana "Simulator", pero solo lo hace si solo hay
@@ -123,14 +124,17 @@ public class PlayerInput : MonoBehaviour {
     }
 }
 #endif
+    #endregion
 
+    #region Checker methods
     private bool MatchesMode(InputMode mode, bool isLeftHalf) {
         return mode switch {
             InputMode.Fullscreen => true,
             InputMode.HalfLeft => isLeftHalf,
             InputMode.HalfRight => !isLeftHalf,
-            InputMode.Button => false,  // Se gestiona desde el bot�n UI
+            InputMode.Button => false,  // Se gestiona desde el boton UI [no implementado por ahora]
             _ => false
         };
     }
+    #endregion
 }

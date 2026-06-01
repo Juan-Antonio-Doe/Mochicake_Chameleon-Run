@@ -82,33 +82,9 @@ public class PauseManager : MonoBehaviour {
         }
     }
 
-    public void SetLastBtnSelected(GameObject btn) {
-        if (!onPause)
-            return;
-
-        lastBtnSelected = btn;
-        EventSystem.current.SetSelectedGameObject(btn);
-    }
-
-    // Called by the pause button event on Player Inputs.
+    // Called by the pause button in the scene.
     public void Pause() {
         StartCoroutine(onPauseCo());
-    }
-
-    public void EnableDisableThings(bool enablePause) {
-        pauseMenu.SetActive(enablePause);
-        //backgroundCanvas?.SetActive(enablePause);
-
-        if (!enablePause) {
-            GeneralUtilities.EnableDisableObjects(false, _objectsToDisable, this);
-        }
-
-        if (enablePause) {
-            EventSystem.current.SetSelectedGameObject(null);
-            firstSelectedButton?.Select();
-        }
-
-        LevelManager.Instance.hud.SetActive(!enablePause);
     }
 
     IEnumerator onPauseCo() {
@@ -135,7 +111,6 @@ public class PauseManager : MonoBehaviour {
     }
 
     #region Buttons Methods
-
     // Called by Restart Button.
     public void RestartLevel() {
         //LoadScene.Load(LoadScene.CurrentIndexScene());
@@ -149,10 +124,36 @@ public class PauseManager : MonoBehaviour {
         sceneIndexToLoad = 0;
         ChangeScene();
     }
+    #endregion
+
+    #region Utility methods
+    public void EnableDisableThings(bool enablePause) {
+        pauseMenu.SetActive(enablePause);
+        //backgroundCanvas?.SetActive(enablePause);
+
+        if (!enablePause) {
+            GeneralUtilities.EnableDisableObjects(false, _objectsToDisable, this);
+        }
+
+        if (enablePause) {
+            EventSystem.current.SetSelectedGameObject(null);
+            firstSelectedButton?.Select();
+        }
+
+        LevelManager.Instance.hud.SetActive(!enablePause);
+    }
 
     public void ChangeScene() {
         onPause = false;
         LoadScene.Load(sceneIndexToLoad);
+    }
+
+    public void SetLastBtnSelected(GameObject btn) {
+        if (!onPause)
+            return;
+
+        lastBtnSelected = btn;
+        EventSystem.current.SetSelectedGameObject(btn);
     }
     #endregion
 }

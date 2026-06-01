@@ -72,8 +72,8 @@ MonoBehaviour:
   <maxJumps>k__BackingField: 2
   <fallMultiplier>k__BackingField: 2.5
   <lowJumpMultiplier>k__BackingField: 2
-  <hipsRotationConstraint>k__BackingField: {fileID: 0}
-  <spineRotationConstraint>k__BackingField: {fileID: 0}
+  <hipsRotationConstraint>k__BackingField: {fileID: 5458826446037759978}
+  <spineRotationConstraint>k__BackingField: {fileID: 3339290091032559037}
   <hipsDuration>k__BackingField: 0.6
   <spinePeakTime>k__BackingField: 0.2
   <spinePeakAngle>k__BackingField: 90

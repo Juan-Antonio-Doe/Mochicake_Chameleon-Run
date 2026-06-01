@@ -64,8 +64,8 @@ public class PlayerController : MonoBehaviour {
 
     private Coroutine somersaultCoroutine { get; set; }
     private bool alreadySomersault { get; set; }
-    private Vector3 hipsOrig {  get; set; }
-    private Vector3 spineOrig {  get; set; }
+    private Vector3 hipsOrig { get; set; } = new Vector3(0f, 1f, 0f);
+    private Vector3 spineOrig { get; set; } = new Vector3(0f, 0.597640872f, 0f);
 
     private float fovVelocity = 0f;
     private float targetFov { get; set; }   
@@ -357,10 +357,11 @@ public class PlayerController : MonoBehaviour {
 
     #endregion
 
+    // -- Checkers ------------------------------------------
 
     #region Reset methods
     // Called by Trigger Zone when reach the end of the test level.
-    public void resetPlayer () {
+    public void resetPlayer() {
         // Reset physics state
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -386,7 +387,7 @@ public class PlayerController : MonoBehaviour {
         mainCam.fieldOfView = minFov;
 
         // Reset animator
-        GeneralUtilities.ResetAnimators(new List<Animator>()  { anim }, this);
+        GeneralUtilities.ResetAnimators(new List<Animator>() { anim }, this);
     }
 
     void ResetSomersaultRotations() {
@@ -397,8 +398,6 @@ public class PlayerController : MonoBehaviour {
     }
 
     #endregion
-
-    // -- Checkers ------------------------------------------
 
     #region Checkers methods
     bool CheckGround() {
