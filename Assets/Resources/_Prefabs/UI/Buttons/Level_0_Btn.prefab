@@ -239,6 +239,9 @@ MonoBehaviour:
   <parentScrollRect>k__BackingField: {fileID: 0}
   <level>k__BackingField: 0
   <levelLabel>k__BackingField: Level
+  <onlyStatsCode>k__BackingField: 0
+  <levelDataForPauseMenu>k__BackingField: {fileID: 11400000, guid: 098a3a0ece17d3542b1dbcd9eb72e81e,
+    type: 2}
   <levelCollectiblesValueText>k__BackingField: {fileID: 2850201698436068326}
   <levelTimeValueText>k__BackingField: {fileID: 7544578243538907537}
   <maxCollectibles>k__BackingField: 

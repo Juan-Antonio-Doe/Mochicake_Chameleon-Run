@@ -92,7 +92,7 @@ public class LevelManager : MonoBehaviour {
 
     void Start() {
         levelTimer.Start();
-        PlayerPrefs.SetInt("LastPlayedLevel", GetLevelNumber());
+        PlayerPrefs.SetInt("LastPlayedLevel", GeneralUtilities.GetLevelNumber());
         PlayerPrefs.Save();
     }
 
@@ -121,7 +121,7 @@ public class LevelManager : MonoBehaviour {
     }
 
     void SaveLevelStats() {
-        int number = GetLevelNumber();
+        int number = GeneralUtilities.GetLevelNumber();
 
         // If the index of the current scene is greater than the index where the numbered levels begin...
         if (LoadScene.CurrentIndexScene() >= 1) {
@@ -151,10 +151,5 @@ public class LevelManager : MonoBehaviour {
             PlayerPrefs.SetFloat($"Level_{number}_Time", levelTimer.CurrentTime);
 
         PlayerPrefs.Save();
-    }
-
-    private static int GetLevelNumber() {
-        string[] parts = LoadScene.CurrentNameScene().Split('_');
-        return int.Parse(parts[parts.Length - 1]);
     }
 }

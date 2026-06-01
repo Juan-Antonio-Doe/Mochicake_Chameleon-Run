@@ -185,6 +185,19 @@ public static class GeneralUtilities {
     }
 
     /// <summary>
+    /// Get the number at the end of the scene name in projects with multiples levels named "whatever_n".
+    /// </summary>
+    public static int GetLevelNumber() {
+        string[] parts = LoadScene.CurrentNameScene().Split('_');
+
+        if (parts.Length > 0) {
+            return int.Parse(parts[parts.Length - 1]);
+        }
+
+        return 0;
+    }
+
+    /// <summary>
     /// Formats a time value in seconds to a string based on the specified format.
     /// </summary>
     /// <param name="time">Time in seconds.</param>

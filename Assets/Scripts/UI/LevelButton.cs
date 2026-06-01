@@ -25,6 +25,8 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
     //private int sceneIndex { get; set; }
 
     [field: Header("Stats properties")]
+    [field: SerializeField] private bool onlyStatsCode { get; set; }
+    [field: SerializeField] private LevelsDatabaseSO levelDataForPauseMenu { get; set; }
     [field: SerializeField, ReadOnlyField] private Text levelCollectiblesValueText { get; set; }
     [field: SerializeField, ReadOnlyField] private Text levelTimeValueText { get; set; }
     [field: SerializeField, ReadOnlyField] private string maxCollectibles {  get; set; }
@@ -45,19 +47,21 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
 }
 
     void AssignComponents() {
-        if (button == null)
-            button = GetComponent<Button>();
-        if (image == null)
-            image = GetComponent<Image>();
+        if (!onlyStatsCode) {
+            if (button == null)
+                button = GetComponent<Button>();
+            if (image == null)
+                image = GetComponent<Image>();
+
+            if (lockImage == null)
+                lockImage = transform.GetChild(0).GetChild(3).GetComponent<Image>();
+        }
 
         if (levelText == null) {
             // Child 0 -> "__Btn_body" - Child 0.0 -> "LevelNumberText"
             levelText = transform.GetChild(0).GetChild(0).GetComponent<Text>();
             levelNameText = levelText.transform.GetChild(0).GetComponent<Text>();
         }
-        
-        if (lockImage == null)
-            lockImage = transform.GetChild(0).GetChild(3).GetComponent<Image>();
 
         if (statsPanel == null) {
             statsPanel = transform.GetChild(0).GetChild(2).gameObject;
@@ -68,6 +72,16 @@ public class LevelButton : MonoBehaviour, IBeginDragHandler,
         revalidateProperties = false;
     }
 #endif
+
+    void Start() {
+        if (onlyStatsCode) {
+            level = GeneralUtilities.GetLevelNumber();
+            levelText.text = $"{levelLabel}: {level}";
+            levelNameText.text = levelDataForPauseMenu.levelDatas[level].levelName;
+            maxCollectibles = levelDataForPauseMenu.levelDatas[level].maxCollectibles;
+            LoadDataLevel();
+        }
+    }
 
     public void Setup(int level, bool isUnlocked, int firtLevelScenesIndex, LevelSelectMenu levelSelectMenu, LevelData levelData) {
         this.level = level;

@@ -417,6 +417,11 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2940483076020811233, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3165409782439829923, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -797,6 +802,21 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[2].m_Target
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6712843608600511726, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6712843608600511726, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6712843608600511726, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.8784314
+      objectReference: {fileID: 0}
     - target: {fileID: 7617915048686180064, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
       propertyPath: m_Text
@@ -867,6 +887,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7617915050048680759, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -270
+      objectReference: {fileID: 0}
     - target: {fileID: 7617915050363453034, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
       propertyPath: m_Name
@@ -891,6 +916,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7617915050363453332, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
+      propertyPath: m_Material
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7617915050363453333, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
@@ -930,6 +960,8 @@ PrefabInstance:
     - {fileID: 2347764130099252990, guid: e957bc4a61bd3164caad7fee961c0e04, type: 3}
     - {fileID: 7617915048768924456, guid: e957bc4a61bd3164caad7fee961c0e04, type: 3}
     - {fileID: 171817801668914760, guid: e957bc4a61bd3164caad7fee961c0e04, type: 3}
+    - {fileID: 1962423545325279445, guid: e957bc4a61bd3164caad7fee961c0e04, type: 3}
+    - {fileID: 5483414404489469817, guid: e957bc4a61bd3164caad7fee961c0e04, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7617915048809288526, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
