@@ -217,17 +217,19 @@ public static class GeneralUtilities {
     }
 
     #region PlayerPrefs Utilities
-#if UNITY_EDITOR
-    private static string Company => PlayerSettings.companyName ?? "UnknownCompany";
-    private static string Product => PlayerSettings.productName ?? "UnknownProduct";
-
     /// <summary>
     /// Delete PlayerPrefs.
     /// </summary>
+#if UNITY_EDITOR
     [MenuItem("Tools/PlayerPrefs/Delete PlayerPrefs")]
+#endif
     public static void DeletePlayerPrefs() {
         PlayerPrefs.DeleteAll();
     }
+
+#if UNITY_EDITOR
+    private static string Company => PlayerSettings.companyName ?? "UnknownCompany";
+    private static string Product => PlayerSettings.productName ?? "UnknownProduct";
 
     /// <summary>
     /// Open PlayerPrefs location.
