@@ -72,8 +72,8 @@ MonoBehaviour:
   <maxJumps>k__BackingField: 2
   <fallMultiplier>k__BackingField: 2.5
   <lowJumpMultiplier>k__BackingField: 2
-  <hipsRotationConstraint>k__BackingField: {fileID: 5458826446037759978}
-  <spineRotationConstraint>k__BackingField: {fileID: 3339290091032559037}
+  <hipsRotationConstraint>k__BackingField: {fileID: 0}
+  <spineRotationConstraint>k__BackingField: {fileID: 0}
   <hipsDuration>k__BackingField: 0.6
   <spinePeakTime>k__BackingField: 0.2
   <spinePeakAngle>k__BackingField: 90
@@ -131,6 +131,7 @@ MonoBehaviour:
     m_Bits: 200
   <currentColor>k__BackingField: 0
   <mainCam>k__BackingField: {fileID: 4298195711527034625}
+  <backgroundOverlayCamera>k__BackingField: {fileID: 5247125696837680590}
   <minFov>k__BackingField: 60
   <maxFov>k__BackingField: 80
   <approachTime>k__BackingField: 0.35

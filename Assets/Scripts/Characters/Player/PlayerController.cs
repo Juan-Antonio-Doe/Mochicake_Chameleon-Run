@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour {
 
     [field: Header("Camera")]
     [field: SerializeField, ReadOnlyField] private Camera mainCam {  get; set; }
+    [field: SerializeField, ReadOnlyField] private Camera backgroundOverlayCamera {  get; set; }
     [field: SerializeField] private float minFov { get; set; } = 60f;
     [field: SerializeField] private float maxFov { get; set; } = 80f;
     [field: SerializeField] private float approachTime { get; set; } = 0.35f;
@@ -124,8 +125,10 @@ public class PlayerController : MonoBehaviour {
             spineRotationConstraint = hipsRotationConstraint.transform.GetChild(0).GetComponent<RotationConstraint>();
         }
 
-        if (mainCam == null)
+        if (mainCam == null) {
             mainCam = Camera.main;
+            backgroundOverlayCamera = mainCam.transform.GetChild(0).GetComponent<Camera>();
+        }
 
         if (pAudioSource == null)
             pAudioSource = GetComponent<AudioSource>();
@@ -313,9 +316,11 @@ public class PlayerController : MonoBehaviour {
             targetFov = minFov;
 
         float smoothTime = (targetFov > mainCam.fieldOfView) ? approachTime : returnTime;
+        float fov;
 
-        // Suaviza el FOV usando SmoothDamp (evita overshoot y es frame-rate independent)
-        mainCam.fieldOfView = Mathf.SmoothDamp(mainCam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+        // Smooths the FOV using SmoothDamp (avoids overshoot and is frame-rate independent).
+        fov = Mathf.SmoothDamp(mainCam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+        backgroundOverlayCamera.fieldOfView = mainCam.fieldOfView = fov;
     }
     #endregion
 
