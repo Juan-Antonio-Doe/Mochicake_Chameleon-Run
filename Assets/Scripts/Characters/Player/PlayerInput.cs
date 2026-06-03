@@ -12,7 +12,7 @@ public class PlayerInput : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private PlayerController playerController { get; set; }
 
     [field: Header("Components")]
-    [field: SerializeField] private InputSettings settings { get; set; }
+    [field: SerializeField] public InputSettings settings { get; private set; }
 
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private bool pressStartedOnUI { get; set; }

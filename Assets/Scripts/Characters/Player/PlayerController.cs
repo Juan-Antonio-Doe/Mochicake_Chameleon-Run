@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
     [field: Header("Components")]
     [field: SerializeField, ReadOnlyField] private CapsuleCollider capCol { get; set; }
     [field: SerializeField, ReadOnlyField] private Rigidbody rb { get; set; }
+    [field: SerializeField, ReadOnlyField] private PlayerInput pInput { get; set; }
     [field: SerializeField, ReadOnlyField] private Renderer[] pRenderers { get; set; } = new Renderer[0];
     [field: SerializeField, ReadOnlyField] private Animator anim { get; set; }
     [field: SerializeField, ReadOnlyField] private ParticleSystem runningDust_vfx { get; set; }
@@ -60,7 +61,9 @@ public class PlayerController : MonoBehaviour {
     [field: SerializeField, ReadOnlyField] private int jumpsRemaining { get; set; }
     [field: SerializeField, ReadOnlyField] private bool jumpHeld { get; set; }
     [field: SerializeField, ReadOnlyField] public bool bigFall { get; set; }    // Called by trigger in scene.
+    [field: SerializeField, ReadOnlyField] public bool inTutorial { get; private set; }
     [field: SerializeField, ReadOnlyField] private Collider[] overlapBuffer { get; set; } = new Collider[4];
+    [field: SerializeField, ReadOnlyField] private List<GameObject> tutorialMessagesToDisable { get; set; } = new List<GameObject>();
 
     private Coroutine somersaultCoroutine { get; set; }
     private bool alreadySomersault { get; set; }
@@ -105,6 +108,9 @@ public class PlayerController : MonoBehaviour {
         if (rb == null)
             rb = GetComponent<Rigidbody>();
 
+        if (pInput == null)
+            pInput = GetComponent<PlayerInput>();
+
         if (pRenderers == null || pRenderers.Length == 0) {
             var renderersAux = transform.GetChild(0).GetChild(1).GetComponentsInChildren<Renderer>();
 
@@ -140,6 +146,7 @@ public class PlayerController : MonoBehaviour {
     }
 #endif
 
+    #region Unity Methods
     void Awake() {
         propBlock = new MaterialPropertyBlock();
     }
@@ -206,6 +213,7 @@ public class PlayerController : MonoBehaviour {
             return;
         }
     }
+    #endregion
 
     // -- Movement ----------------------------------------------
 
@@ -242,85 +250,6 @@ public class PlayerController : MonoBehaviour {
 
         if (extraGravity > 0f)
             rb.AddForce(Vector3.down * Physics.gravity.magnitude * extraGravity, ForceMode.Acceleration);
-    }
-    #endregion
-
-    #region Extra methods
-    private void StartSomersault() {
-        if (somersaultCoroutine != null) StopCoroutine(somersaultCoroutine);
-        somersaultCoroutine = StartCoroutine(DoSomersault());
-        alreadySomersault = true;
-    }
-
-    private IEnumerator DoSomersault() {
-        if (hipsRotationConstraint == null || spineRotationConstraint == null) yield break;
-
-        Transform hips = hipsRotationConstraint.GetSource(0).sourceTransform;
-        Transform spine = spineRotationConstraint.GetSource(0).sourceTransform;
-
-        hipsOrig = hips.localEulerAngles;
-        spineOrig = spine.localEulerAngles;
-
-        float elapsed = 0f;
-        float duration = Mathf.Max(0.01f, hipsDuration);
-        float peakT = Mathf.Clamp01(spinePeakTime);
-
-        hipsRotationConstraint.constraintActive = true;
-        spineRotationConstraint.constraintActive = true;
-
-        while (elapsed < duration) {
-            float t = elapsed / duration; // 0..1
-
-            float hipsT = hipsCurve.Evaluate(t);
-            float spineT = spineCurve.Evaluate(t);
-
-            // HIPS: 0 -> 360 (smooth)
-            float hipsAngle = Mathf.Lerp(0f, 360f, hipsT);
-
-            // SPINE: Increase to spinePeakAngle in the first phase (0..peakT), then return to 0.
-            float spineAngle;
-            if (t <= peakT) {
-                float localT = (peakT <= 0f) ? 1f : (t / peakT);
-                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
-                spineAngle = Mathf.Lerp(0f, spinePeakAngle, localT);
-            }
-            else {
-                float localT = (1f - peakT <= 0f) ? 1f : ((t - peakT) / (1f - peakT));
-                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
-                spineAngle = Mathf.Lerp(spinePeakAngle, 0f, localT);
-            }
-
-            // Apply rotations
-            hips.localRotation = Quaternion.Euler(hipsAngle, hipsOrig.y, hipsOrig.z);
-            spine.localRotation = Quaternion.Euler(spineAngle, spineOrig.y, spineOrig.z);
-
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        // Reset values to original state.
-        ResetSomersaultRotations();
-
-        somersaultCoroutine = null;
-    }
-
-    void CameraFovOnFall() {
-        if (isGrounded && (bigFall || mainCam.fieldOfView != minFov)) {
-            bigFall = false;
-            return;
-        }
-
-        if (bigFall && !isGrounded)
-            targetFov = maxFov;
-        else
-            targetFov = minFov;
-
-        float smoothTime = (targetFov > mainCam.fieldOfView) ? approachTime : returnTime;
-        float fov;
-
-        // Smooths the FOV using SmoothDamp (avoids overshoot and is frame-rate independent).
-        fov = Mathf.SmoothDamp(mainCam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
-        backgroundOverlayCamera.fieldOfView = mainCam.fieldOfView = fov;
     }
     #endregion
 
@@ -386,6 +315,11 @@ public class PlayerController : MonoBehaviour {
         bigFall = false;
         mainCam.fieldOfView = minFov;
 
+        // Reset tutorial values
+        if (inTutorial) {
+            EndTutorial();
+        }
+
         // Reset animator
         GeneralUtilities.ResetAnimators(new List<Animator>() { anim }, this);
     }
@@ -436,5 +370,141 @@ public class PlayerController : MonoBehaviour {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 #endif
+    #endregion
+
+    // -- Misc ------------------------------------------
+
+    #region Extra methods
+    #region Somersault methods
+    private void StartSomersault() {
+        if (somersaultCoroutine != null) StopCoroutine(somersaultCoroutine);
+        somersaultCoroutine = StartCoroutine(DoSomersault());
+        alreadySomersault = true;
+    }
+
+    private IEnumerator DoSomersault() {
+        if (hipsRotationConstraint == null || spineRotationConstraint == null) yield break;
+
+        Transform hips = hipsRotationConstraint.GetSource(0).sourceTransform;
+        Transform spine = spineRotationConstraint.GetSource(0).sourceTransform;
+
+        hipsOrig = hips.localEulerAngles;
+        spineOrig = spine.localEulerAngles;
+
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, hipsDuration);
+        float peakT = Mathf.Clamp01(spinePeakTime);
+
+        hipsRotationConstraint.constraintActive = true;
+        spineRotationConstraint.constraintActive = true;
+
+        while (elapsed < duration) {
+            float t = elapsed / duration; // 0..1
+
+            float hipsT = hipsCurve.Evaluate(t);
+            float spineT = spineCurve.Evaluate(t);
+
+            // HIPS: 0 -> 360 (smooth)
+            float hipsAngle = Mathf.Lerp(0f, 360f, hipsT);
+
+            // SPINE: Increase to spinePeakAngle in the first phase (0..peakT), then return to 0.
+            float spineAngle;
+            if (t <= peakT) {
+                float localT = (peakT <= 0f) ? 1f : (t / peakT);
+                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
+                spineAngle = Mathf.Lerp(0f, spinePeakAngle, localT);
+            }
+            else {
+                float localT = (1f - peakT <= 0f) ? 1f : ((t - peakT) / (1f - peakT));
+                localT = Mathf.SmoothStep(0f, 1f, localT) * spineCurve.Evaluate(t);
+                spineAngle = Mathf.Lerp(spinePeakAngle, 0f, localT);
+            }
+
+            // Apply rotations
+            hips.localRotation = Quaternion.Euler(hipsAngle, hipsOrig.y, hipsOrig.z);
+            spine.localRotation = Quaternion.Euler(spineAngle, spineOrig.y, spineOrig.z);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Reset values to original state.
+        ResetSomersaultRotations();
+
+        somersaultCoroutine = null;
+    }
+    #endregion
+
+    void CameraFovOnFall() {
+        if (isGrounded && (bigFall || mainCam.fieldOfView != minFov)) {
+            bigFall = false;
+            return;
+        }
+
+        if (bigFall && !isGrounded)
+            targetFov = maxFov;
+        else
+            targetFov = minFov;
+
+        float smoothTime = (targetFov > mainCam.fieldOfView) ? approachTime : returnTime;
+        float fov;
+
+        // Smooths the FOV using SmoothDamp (avoids overshoot and is frame-rate independent).
+        fov = Mathf.SmoothDamp(mainCam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, Time.deltaTime);
+        backgroundOverlayCamera.fieldOfView = mainCam.fieldOfView = fov;
+    }
+
+    #region Tutorial Methods
+    // This methods are usually called by triggers in the scene.
+
+    public void Tutorial1(UnityEngine.UI.Text tutorialMessage) {
+        if (PlayerPrefs.GetInt("UnlokedLevels", 0) > 0) return; // No tutorial if the level has been already completed.
+
+        inTutorial = true;
+
+        Time.timeScale = 0.25f;
+
+        GameObject aux = tutorialMessage.transform.parent.gameObject;
+        aux.SetActive(true);
+
+        string currentInput = pInput.settings.JumpMode == InputMode.HalfRight ? "the right side" : "the left side";
+
+        tutorialMessage.text = $"Tap {currentInput} of the screen to jump.";
+
+        tutorialMessagesToDisable.Add(aux);
+    }
+
+    public void Tutorial2(UnityEngine.UI.Text tutorialMessage) {
+        if (PlayerPrefs.GetInt("UnlokedLevels", 0) > 0) return; // No tutorial if the level has been already completed.
+
+        inTutorial = true;
+
+        Time.timeScale = 0.25f;
+
+        GameObject aux = tutorialMessage.transform.parent.gameObject;
+        aux.SetActive(true);
+
+        string currentInput = pInput.settings.JumpMode == InputMode.HalfRight ? "the right side" : "the left side";
+
+        tutorialMessage.text = $"- Tap <color=red>jump mid air</color> to perform a somersault.\n" +
+            $"- Tap {currentInput} of the screen to <color=blue>switch color</color>.";
+
+        tutorialMessagesToDisable.Add(aux);
+    }
+
+    public void EndTutorial() {
+        inTutorial = false;
+
+        if (tutorialMessagesToDisable.Count > 0) {
+            foreach (GameObject tObj in tutorialMessagesToDisable) {
+                tObj.SetActive(false);
+            }
+        }
+
+        tutorialMessagesToDisable.Clear();
+
+        Time.timeScale = 1f;
+    }
+    #endregion
     #endregion
 }

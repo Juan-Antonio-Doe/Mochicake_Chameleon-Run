@@ -11,6 +11,7 @@ public class PauseManager : MonoBehaviour {
 
     [field: Header("General pause properties")]
     [field: SerializeField] private bool revalidateProperties { get; set; }
+    [field: SerializeField, ReadOnlyField] private LevelManager levelManager { get; set; }
 
     [field: Header("UI properties")]
     [field: SerializeField] private GameObject pauseMenu { get; set; }
@@ -35,6 +36,7 @@ public class PauseManager : MonoBehaviour {
     [field: Header("Debug")]
     [field: SerializeField, ReadOnlyField] private int sceneIndexToLoad { get; set; }
     [field: SerializeField, ReadOnlyField] private GameObject lastBtnSelected { get; set; }
+    [field: SerializeField, ReadOnlyField] private float previousTimeScale { get; set; }
 
 
 #if UNITY_EDITOR
@@ -52,6 +54,9 @@ public class PauseManager : MonoBehaviour {
     }
 
     void ValidateAssings() {
+
+        if (levelManager == null)
+            levelManager = FindObjectOfType<LevelManager>();
 
         if (menuAnim == null) {
             menuAnim = GetComponentInChildren<Animator>();
@@ -90,7 +95,10 @@ public class PauseManager : MonoBehaviour {
     IEnumerator onPauseCo() {
         if (!onPause) {
             onPause = true;
+
+            previousTimeScale = Time.timeScale;
             Time.timeScale = 0;
+
             EnableDisableThings(true);
             yield return null;
         }
@@ -106,7 +114,11 @@ public class PauseManager : MonoBehaviour {
             GeneralUtilities.ResetAnimators(new List<Animator>() { menuAnim }, this);
 
             onPause = false;
-            Time.timeScale = 1;
+
+            if (levelManager.playerController.inTutorial)
+                Time.timeScale = previousTimeScale;
+            else
+                Time.timeScale = 1f;
         }
     }
 

@@ -56,6 +56,7 @@ MonoBehaviour:
   <levelManager>k__BackingField: {fileID: 0}
   <capCol>k__BackingField: {fileID: 75434787345687519}
   <rb>k__BackingField: {fileID: 6866965466461690298}
+  <pInput>k__BackingField: {fileID: 713877507081047720}
   <pRenderers>k__BackingField:
   - {fileID: 778987197686724573}
   - {fileID: 7474138413275585729}
@@ -142,6 +143,7 @@ MonoBehaviour:
   <jumpsRemaining>k__BackingField: 0
   <jumpHeld>k__BackingField: 0
   <bigFall>k__BackingField: 0
+  <inTutorial>k__BackingField: 0
   <overlapBuffer>k__BackingField:
   - {fileID: 0}
   - {fileID: 0}

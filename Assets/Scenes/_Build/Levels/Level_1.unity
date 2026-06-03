@@ -1569,6 +1569,11 @@ PrefabInstance:
       objectReference: {fileID: 964750439}
     - target: {fileID: 5389623851758136270, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
+      propertyPath: <levelManager>k__BackingField
+      value: 
+      objectReference: {fileID: 519262731}
+    - target: {fileID: 5389623851758136270, guid: e957bc4a61bd3164caad7fee961c0e04,
+        type: 3}
       propertyPath: <unpauseCircleGO>k__BackingField
       value: 
       objectReference: {fileID: 175036047}
@@ -1576,11 +1581,6 @@ PrefabInstance:
         type: 3}
       propertyPath: <unpauseCircleAnim>k__BackingField
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5389623851758136270, guid: e957bc4a61bd3164caad7fee961c0e04,
-        type: 3}
-      propertyPath: <revalidateProperties>k__BackingField
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8921627826803077675, guid: e957bc4a61bd3164caad7fee961c0e04,
         type: 3}
